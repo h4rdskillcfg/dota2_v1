@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota 2 Hero Counter Picker</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: #e0e0e0;
+            overscroll-behavior: none;
+        }
+
+        /* Header with Search */
+        header {
+            background-color: #1f2639;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #search-input, #builds-search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #3a4a6b;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: #2a324a;
+            color: #e0e0e0;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #search-input:focus, #builds-search-input:focus {
+            border-color: #d32f2f;
+            box-shadow: 0 0 5px rgba(211, 47, 47, 0.5);
+            outline: none;
+        }
+
+        /* Pages Animation */
+        .page {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            min-height: 0; /* Убедимся, что страница не сжимается */
+        }
+
+        .page.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Heroes and Builds Lists */
+        #heroes-list, #builds-list {
+            overflow-y: auto;
+            padding: 15px;
+            list-style: none;
+            margin: 0;
+            flex: 1; /* Занимает всё доступное пространство */
+            min-height: 0; /* Позволяет прокрутку, если контент превышает высоту */
+        }
+
+        .hero-item {
+            display: flex;
+            align-items: center;
+            background-color: #2a324a;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .hero-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 1px solid #3a4a6b;
+        }
+
+        .hero-icon-error {
+            background-color: #3a4a6b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0e0;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .hero-name {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Modal */
+        #modal, #reason-modal, #build-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .modal-content, .reason-content, .build-content {
+            background: #1f2639;
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+            text-align: left;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            overflow-y: auto;
+            max-height: 80vh;
+            scrollbar-width: thin;
+            scrollbar-color: #d32f2f #2a324a;
+        }
+
+        .modal-content::-webkit-scrollbar, .reason-content::-webkit-scrollbar, .build-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb, .reason-content::-webkit-scrollbar-thumb, .build-content::-webkit-scrollbar-thumb {
+            background: #d32f2f;
+            border-radius: 4px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #d32f2f;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .counter-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .counter-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            background-color: #2a324a;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .counter-item:hover {
+            background-color: #3a4a6b;
+        }
+
+        .counter-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            margin-right: 12px;
+            border: 1px solid #3a4a6b;
+        }
+
+        .reason-text, .build-section {
+            font-size: 16px;
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .build-section h3 {
+            color: #d32f2f;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .build-grid {
+            display: grid;
+            grid-template-columns: 40px 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #3a4a6b;
+            object-fit: contain;
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: block;
+            width: 100%;
+        }
+
+        .close-btn:hover {
+            background-color: #b71c1c;
+        }
+
+        /* Profile Page */
+        #profile-page {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 2px solid #d32f2f;
+        }
+
+        .profile-nick {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
+        .profile-info {
+            font-size: 16px;
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        #nick-input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #3a4a6b;
+            border-radius: 8px;
+            background-color: #2a324a;
+            color: #e0e0e0;
+        }
+
+        #save-nick-btn {
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin: 10px 0;
+        }
+
+        #save-nick-btn:hover {
+            background-color: #b71c1c;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Bottom Menu */
+        nav {
+            background-color: #1f2639;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            bottom: 0;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 12px;
+            flex: 1;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-item.active {
+            color: #d32f2f;
+            font-weight: 700;
+        }
+
+        .nav-item i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Heroes Page -->
+    <div id="heroes-page" class="page">
+        <header>
+            <input type="text" id="search-input" placeholder="Найти героя...">
+        </header>
+        <ul id="heroes-list"></ul>
+    </div>
+
+    <!-- Builds Page -->
+    <div id="builds-page" class="page">
+        <header>
+            <input type="text" id="builds-search-input" placeholder="Найти героя...">
+        </header>
+        <ul id="builds-list"></ul>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile-page" class="page">
+        <img src="https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/32/328dd7e5c9b95d1e0471f1c047d3e5b17bd3f1f3_full.jpg" alt="Avatar" class="profile-avatar">
+        <div class="profile-nick" id="profile-nick">DotaMaster</div>
+        <input type="text" id="nick-input" placeholder="Новый никнейм (3-20 символов)" maxlength="20">
+        <button id="save-nick-btn">Сохранить</button>
+        <div class="error-message" id="nick-error">Ник должен быть от 3 до 20 символов</div>
+        <div class="profile-info" id="profile-info">
+            Никнейм: <span id="profile-nickname">DotaMaster</span><br>
+            Матчей сыграно: 1,247<br>
+            Рейтинг (MMR): 7,820
+        </div>
+    </div>
+
+    <!-- Counter Modal -->
+    <div id="modal">
+        <div class="modal-content">
+            <div class="modal-title">Контрпики для <span id="selected-hero"></span></div>
+            <ul class="counter-list" id="counter-list"></ul>
+            <button class="close-btn" onclick="closeModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Reason Modal -->
+    <div id="reason-modal">
+        <div class="reason-content">
+            <div class="modal-title">Почему <span id="counter-hero"></span> контрпикает?</div>
+            <div class="reason-text" id="reason-text"></div>
+            <button class="close-btn" onclick="closeReasonModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Build Modal -->
+    <div id="build-modal">
+        <div class="build-content">
+            <div class="modal-title">Сборка для <span id="build-hero"></span></div>
+            <div id="build-role"></div>
+            <div id="build-details"></div>
+            <button class="close-btn" onclick="closeBuildModal()">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav>
+        <div class="nav-item active" onclick="showPage('heroes')"><i class="fas fa-shield-alt"></i>Герои</div>
+        <div class="nav-item" onclick="showPage('builds')"><i class="fas fa-tools"></i>Сборки</div>
+        <div class="nav-item" onclick="showPage('profile')"><i class="fas fa-user"></i>Мой профиль</div>
+    </nav>
+
+    <script>
+        // Telegram Web App Init
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+
+        // Font Awesome for icons
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(link);
+
+        // Heroes Data
+        const heroes = [
+            { id: 1, name: 'Invoker', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/invoker_icon.png' },
+            { id: 2, name: 'Anti-Mage', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/antimage_icon.png' },
+            { id: 3, name: 'Shadow Fiend', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/nevermore_icon.png' },
+            { id: 4, name: 'Pudge', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/pudge_icon.png' },
+            { id: 5, name: 'Sniper', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/sniper_icon.png' }
+        ];
+
+        // Counters Data with Reasons
+        const counters = {
+            1: [
+                { name: 'Silencer', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/silencer_icon.png', reason: 'Glaives of Wisdom крадут интеллект, а Global Silence блокирует заклинания Invoker.' },
+                { name: 'Doom', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/doom_bringer_icon.png', reason: 'Ultimate Doom замолкает и отключает пассивные способности, делая Invoker бесполезным.' },
+                { name: 'Ancient Apparition', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/ancient_apparition_icon.png', reason: 'Ice Blast предотвращает лечение и может убить с низким HP.' }
+            ],
+            2: [
+                { name: 'Bloodseeker', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/bloodseeker_icon.png', reason: 'Rupture заставляет Anti-Mage выбирать между движением и получением урона или стоянием на месте.' },
+                { name: 'Ancient Apparition', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/ancient_apparition_icon.png', reason: 'Ice Blast предотвращает лечение от высокой регенерации или предметов Anti-Mage.' },
+                { name: 'Shadow Demon', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/shadow_demon_icon.png', reason: 'Disruption настраивает на цепные отключения, иллюзии наносят дополнительный урон с Mana Break.' }
+            ],
+            3: [
+                { name: 'Puck', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/puck_icon.png', reason: 'Phase Shift уклоняется от разов, Silence предотвращает кастинг Shadow Fiend.' },
+                { name: 'Storm Spirit', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/storm_spirit_icon.png', reason: 'Ball Lightning для ганка, Orchid silence.' },
+                { name: 'Lina', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/lina_icon.png', reason: 'Dragon Slave для харасса, высокий burst урон.' }
+            ],
+            4: [
+                { name: 'Ancient Apparition', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/ancient_apparition_icon.png', reason: 'Ice Blast предотвращает лечение от высокой регенерации Pudge.' },
+                { name: 'Shadow Demon', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/shadow_demon_icon.png', reason: 'Disruption спасает союзников от хука/дисмембера, иллюзии.' },
+                { name: 'Oracle', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/oracle_icon.png', reason: 'False Promise спасает от burst, диспелы.' }
+            ],
+            5: [
+                { name: 'Phantom Assassin', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/phantom_assassin_icon.png', reason: 'Blur для подхода невидимой, Coup de Grace быстро режет низкое HP.' },
+                { name: 'Bounty Hunter', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/bounty_hunter_icon.png', reason: 'Track для видимости, burst урон.' },
+                { name: 'Spectre', icon: 'https://cdn.dota2.com/apps/dota2/images/heroes/spectre_icon.png', reason: 'Reality для прыжка на Sniper.' }
+            ]
+        };
+
+        // Builds Data with Item Icons and Role (Updated with meta items and timings, October 2023)
+        const builds = {
+            1: { // Invoker
+                role: 'Mid (Quas-Exort build)',
+                starting: [
+                    { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tango_lg.png' },
+                    { name: 'Faerie Fire', icon: 'https://cdn.dota2.com/apps/dota2/images/items/faerie_fire_lg.png' },
+                    { name: 'Iron Branch x2', icon: 'https://cdn.dota2.com/apps/dota2/images/items/branch_lg.png' },
+                    { name: 'Circlet', icon: 'https://cdn.dota2.com/apps/dota2/images/items/circlet_lg.png' }
+                ],
+                early: [
+                    { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/items/bottle_lg.png', time: '2:00' },
+                    { name: 'Magic Stick', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_stick_lg.png', time: '3:00' },
+                    { name: 'Boots of Speed', icon: 'https://cdn.dota2.com/apps/dota2/images/items/boots_of_speed_lg.png', time: '5:00' }
+                ],
+                core: [
+                    { name: 'Magic Wand', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_wand_lg.png', time: '8:00' },
+                    { name: 'Arcane Boots', icon: 'https://cdn.dota2.com/apps/dota2/images/items/arcane_boots_lg.png', time: '12:00' },
+                    { name: 'Aghanim’s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/items/ultimate_scepter_lg.png', time: '18:00' }
+                ],
+                extensions: [
+                    { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/items/blink_lg.png', time: '22:00', usage: '45%' },
+                    { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/black_king_bar_lg.png', time: '25:00', usage: '30%' },
+                    { name: 'Scythe of Vyse', icon: 'https://cdn.dota2.com/apps/dota2/images/items/sheepstick_lg.png', time: '30:00', usage: '20%' },
+                    { name: 'Refresher Orb', icon: 'https://cdn.dota2.com/apps/dota2/images/items/refresher_lg.png', time: '35:00', usage: '15%' }
+                ]
+            },
+            2: { // Anti-Mage
+                role: 'Carry (Safe Lane)',
+                starting: [
+                    { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tango_lg.png' },
+                    { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/items/quelling_blade_lg.png' },
+                    { name: 'Iron Branch x2', icon: 'https://cdn.dota2.com/apps/dota2/images/items/branch_lg.png' },
+                    { name: 'Slippers of Agility', icon: 'https://cdn.dota2.com/apps/dota2/images/items/slippers_lg.png' }
+                ],
+                early: [
+                    { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/items/power_treads_lg.png', time: '6:00' },
+                    { name: 'Battle Fury', icon: 'https://cdn.dota2.com/apps/dota2/images/items/bfury_lg.png', time: '12:00' },
+                    { name: 'Manta Style', icon: 'https://cdn.dota2.com/apps/dota2/images/items/manta_lg.png', time: '18:00' }
+                ],
+                core: [
+                    { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/black_king_bar_lg.png', time: '22:00' },
+                    { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/items/abyssal_blade_lg.png', time: '28:00' },
+                    { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/items/butterfly_lg.png', time: '32:00' }
+                ],
+                extensions: [
+                    { name: 'Eye of Skadi', icon: 'https://cdn.dota2.com/apps/dota2/images/items/skadi_lg.png', time: '35:00', usage: '40%' },
+                    { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/items/satanic_lg.png', time: '38:00', usage: '25%' },
+                    { name: 'Monkey King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/monkey_king_bar_lg.png', time: '36:00', usage: '20%' },
+                    { name: 'Bloodthorn', icon: 'https://cdn.dota2.com/apps/dota2/images/items/bloodthorn_lg.png', time: '40:00', usage: '10%' }
+                ]
+            },
+            3: { // Shadow Fiend
+                role: 'Mid',
+                starting: [
+                    { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tango_lg.png' },
+                    { name: 'Faerie Fire', icon: 'https://cdn.dota2.com/apps/dota2/images/items/faerie_fire_lg.png' },
+                    { name: 'Iron Branch x2', icon: 'https://cdn.dota2.com/apps/dota2/images/items/branch_lg.png' },
+                    { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/items/wraith_band_lg.png' }
+                ],
+                early: [
+                    { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/items/bottle_lg.png', time: '2:30' },
+                    { name: 'Boots of Speed', icon: 'https://cdn.dota2.com/apps/dota2/images/items/boots_of_speed_lg.png', time: '5:00' },
+                    { name: 'Magic Stick', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_stick_lg.png', time: '4:00' }
+                ],
+                core: [
+                    { name: 'Magic Wand', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_wand_lg.png', time: '7:00' },
+                    { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/items/power_treads_lg.png', time: '10:00' },
+                    { name: 'Dragon Lance', icon: 'https://cdn.dota2.com/apps/dota2/images/items/dragon_lance_lg.png', time: '13:00' },
+                    { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/black_king_bar_lg.png', time: '20:00' }
+                ],
+                extensions: [
+                    { name: 'Hurricane Pike', icon: 'https://cdn.dota2.com/apps/dota2/images/items/hurricane_pike_lg.png', time: '24:00', usage: '35%' },
+                    { name: 'Silver Edge', icon: 'https://cdn.dota2.com/apps/dota2/images/items/silver_edge_lg.png', time: '27:00', usage: '25%' },
+                    { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/items/satanic_lg.png', time: '32:00', usage: '20%' },
+                    { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/items/butterfly_lg.png', time: '35:00', usage: '15%' }
+                ]
+            },
+            4: { // Pudge
+                role: 'Offlane/Support',
+                starting: [
+                    { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tango_lg.png' },
+                    { name: 'Iron Branch x2', icon: 'https://cdn.dota2.com/apps/dota2/images/items/branch_lg.png' },
+                    { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/items/clarity_lg.png' },
+                    { name: 'Wind Lace', icon: 'https://cdn.dota2.com/apps/dota2/images/items/wind_lace_lg.png' }
+                ],
+                early: [
+                    { name: 'Tranquil Boots', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tranquil_boots_lg.png', time: '5:00' },
+                    { name: 'Magic Stick', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_stick_lg.png', time: '4:00' },
+                    { name: 'Hood of Defiance', icon: 'https://cdn.dota2.com/apps/dota2/images/items/hood_of_defiance_lg.png', time: '10:00' }
+                ],
+                core: [
+                    { name: 'Magic Wand', icon: 'https://cdn.dota2.com/apps/dota2/images/items/magic_wand_lg.png', time: '8:00' },
+                    { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/items/blink_lg.png', time: '14:00' },
+                    { name: 'Aghanim’s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/items/ultimate_scepter_lg.png', time: '20:00' }
+                ],
+                extensions: [
+                    { name: 'Lotus Orb', icon: 'https://cdn.dota2.com/apps/dota2/images/items/lotus_orb_lg.png', time: '25:00', usage: '30%' },
+                    { name: 'Shiva’s Guard', icon: 'https://cdn.dota2.com/apps/dota2/images/items/shivas_guard_lg.png', time: '28:00', usage: '25%' },
+                    { name: 'Eternal Shroud', icon: 'https://cdn.dota2.com/apps/dota2/images/items/eternal_shroud_lg.png', time: '27:00', usage: '20%' },
+                    { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/black_king_bar_lg.png', time: '30:00', usage: '15%' }
+                ]
+            },
+            5: { // Sniper
+                role: 'Mid/Carry',
+                starting: [
+                    { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/items/tango_lg.png' },
+                    { name: 'Iron Branch x2', icon: 'https://cdn.dota2.com/apps/dota2/images/items/branch_lg.png' },
+                    { name: 'Slippers of Agility', icon: 'https://cdn.dota2.com/apps/dota2/images/items/slippers_lg.png' },
+                    { name: 'Faerie Fire', icon: 'https://cdn.dota2.com/apps/dota2/images/items/faerie_fire_lg.png' }
+                ],
+                early: [
+                    { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/items/wraith_band_lg.png', time: '3:00' },
+                    { name: 'Boots of Speed', icon: 'https://cdn.dota2.com/apps/dota2/images/items/boots_of_speed_lg.png', time: '4:00' },
+                    { name: 'Maelstrom', icon: 'https://cdn.dota2.com/apps/dota2/images/items/maelstrom_lg.png', time: '10:00' }
+                ],
+                core: [
+                    { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/items/power_treads_lg.png', time: '8:00' },
+                    { name: 'Dragon Lance', icon: 'https://cdn.dota2.com/apps/dota2/images/items/dragon_lance_lg.png', time: '12:00' },
+                    { name: 'Hurricane Pike', icon: 'https://cdn.dota2.com/apps/dota2/images/items/hurricane_pike_lg.png', time: '16:00' },
+                    { name: 'Mjollnir', icon: 'https://cdn.dota2.com/apps/dota2/images/items/mjollnir_lg.png', time: '22:00' }
+                ],
+                extensions: [
+                    { name: 'Silver Edge', icon: 'https://cdn.dota2.com/apps/dota2/images/items/silver_edge_lg.png', time: '27:00', usage: '35%' },
+                    { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/items/satanic_lg.png', time: '32:00', usage: '25%' },
+                    { name: 'Monkey King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/items/monkey_king_bar_lg.png', time: '30:00', usage: '20%' },
+                    { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/items/butterfly_lg.png', time: '34:00', usage: '15%' }
+                ]
+            }
+        };
+
+        // Image Error Handling
+        function handleImageError(img) {
+            img.src = 'https://via.placeholder.com/60?text=Item';
+            img.classList.add('hero-icon-error');
+        }
+
+        // Render Heroes List
+        function renderHeroes(filteredHeroes = heroes) {
+            const list = document.getElementById('heroes-list');
+            list.innerHTML = '';
+            filteredHeroes.forEach(hero => {
+                const li = document.createElement('li');
+                li.className = 'hero-item';
+                li.innerHTML = `<img src="${hero.icon}" alt="${hero.name}" class="hero-icon" onerror="handleImageError(this)"><span class="hero-name">${hero.name}</span>`;
+                li.onclick = () => showModal(hero);
+                list.appendChild(li);
+            });
+        }
+
+        renderHeroes();
+
+        // Search Functionality for Heroes
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = heroes.filter(hero => hero.name.toLowerCase().includes(query));
+            renderHeroes(filtered);
+        });
+
+        // Render Builds List
+        function renderBuilds(filteredHeroes = heroes) {
+            const list = document.getElementById('builds-list');
+            list.innerHTML = '';
+            filteredHeroes.forEach(hero => {
+                const li = document.createElement('li');
+                li.className = 'hero-item';
+                li.innerHTML = `<img src="${hero.icon}" alt="${hero.name}" class="hero-icon" onerror="handleImageError(this)"><span class="hero-name">${hero.name}</span>`;
+                li.onclick = () => showBuildModal(hero);
+                list.appendChild(li);
+            });
+        }
+
+        renderBuilds();
+
+        // Search Functionality for Builds
+        document.getElementById('builds-search-input').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const filtered = heroes.filter(hero => hero.name.toLowerCase().includes(query));
+            renderBuilds(filtered);
+        });
+
+        // Show Counter Modal
+        function showModal(hero) {
+            document.getElementById('selected-hero').textContent = hero.name;
+            const counterList = document.getElementById('counter-list');
+            counterList.innerHTML = '';
+            counters[hero.id].forEach(counter => {
+                const li = document.createElement('li');
+                li.className = 'counter-item';
+                li.innerHTML = `<img src="${counter.icon}" alt="${counter.name}" class="counter-icon" onerror="handleImageError(this)"><span>${counter.name}</span>`;
+                li.onclick = () => showReasonModal(counter);
+                counterList.appendChild(li);
+            });
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        // Close Counter Modal
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Show Reason Modal
+        function showReasonModal(counter) {
+            document.getElementById('counter-hero').textContent = counter.name;
+            document.getElementById('reason-text').textContent = counter.reason;
+            document.getElementById('reason-modal').style.display = 'flex';
+        }
+
+        // Close Reason Modal
+        function closeReasonModal() {
+            document.getElementById('reason-modal').style.display = 'none';
+        }
+
+        // Show Build Modal
+        function showBuildModal(hero) {
+            document.getElementById('build-hero').textContent = hero.name;
+            const build = builds[hero.id];
+            document.getElementById('build-role').innerHTML = `<div class="build-section"><h3>Позиция</h3><p>${build.role}</p></div>`;
+            const details = document.getElementById('build-details');
+            details.innerHTML = `
+                <div class="build-section"><h3>Стартовые предметы</h3>${build.starting.map(item => `<div class="build-grid"><img src="${item.icon}" alt="${item.name}" class="item-icon" onerror="handleImageError(this)"><span>${item.name}</span></div>`).join('')}</div>
+                <div class="build-section"><h3>Ранние предметы</h3>${build.early.map(item => `<div class="build-grid"><img src="${item.icon}" alt="${item.name}" class="item-icon" onerror="handleImageError(this)"><span>${item.name} <small>(${item.time})</small></span></div>`).join('')}</div>
+                <div class="build-section"><h3>Коре предметы</h3>${build.core.map(item => `<div class="build-grid"><img src="${item.icon}" alt="${item.name}" class="item-icon" onerror="handleImageError(this)"><span>${item.name} <small>(${item.time})</small></span></div>`).join('')}</div>
+                <div class="build-section"><h3>Экстеншены</h3>${build.extensions.map(item => `<div class="build-grid"><img src="${item.icon}" alt="${item.name}" class="item-icon" onerror="handleImageError(this)"><span>${item.name} <small>(${item.time}, ${item.usage})</small></span></div>`).join('')}</div>
+            `;
+            document.getElementById('build-modal').style.display = 'flex';
+        }
+
+        // Close Build Modal
+        function closeBuildModal() {
+            document.getElementById('build-modal').style.display = 'none';
+        }
+
+        // Close Modals on Outside Click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal')) closeModal();
+        });
+        document.getElementById('reason-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('reason-modal')) closeReasonModal();
+        });
+        document.getElementById('build-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('build-modal')) closeBuildModal();
+        });
+
+        // Page Switching with Animation
+        function showPage(page) {
+            const pages = document.querySelectorAll('.page');
+            const navItems = document.querySelectorAll('.nav-item');
+            pages.forEach(p => p.classList.remove('active'));
+            navItems.forEach(item => item.classList.remove('active'));
+            const activePage = document.getElementById(`${page}-page`);
+            activePage.classList.add('active');
+            document.querySelector(`.nav-item[onclick="showPage('${page}')"]`).classList.add('active');
+        }
+
+        // Change Nickname with Validation
+        const nickInput = document.getElementById('nick-input');
+        const saveNickBtn = document.getElementById('save-nick-btn');
+        const nickError = document.getElementById('nick-error');
+        const profileNickname = document.getElementById('profile-nickname');
+
+        saveNickBtn.addEventListener('click', () => {
+            const newNick = nickInput.value.trim();
+            if (newNick.length < 3 || newNick.length > 20) {
+                nickError.style.display = 'block';
+                return;
+            }
+            nickError.style.display = 'none';
+            profileNickname.textContent = newNick;
+            document.getElementById('profile-nick').textContent = newNick;
+            nickInput.value = '';
+            localStorage.setItem('nickname', newNick); // Save to localStorage
+        });
+
+        // Load Saved Nickname
+        const savedNick = localStorage.getItem('nickname');
+        if (savedNick) {
+            profileNickname.textContent = savedNick;
+            document.getElementById('profile-nick').textContent = savedNick;
+        }
+
+        // Initialize with Heroes Page
+        showPage('heroes');
+    </script>
+</body>
+</html>
