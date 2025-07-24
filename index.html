@@ -2,386 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOTA 2 Helper - Telegram Mini App</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>DOTA 2 Helper</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --tg-theme-bg-color: #ffffff;
-            --tg-theme-text-color: #000000;
-            --tg-theme-button-color: #3390ec;
-            --tg-theme-button-text-color: #ffffff;
-            --tg-theme-secondary-bg-color: #f0f0f0;
-            --tg-theme-accent-color: #ff4500;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            padding-bottom: 70px;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            transform: translateY(20px);
-        }
-
-        .tab-content.active {
-            display: block;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tab-bar {
-            display: flex;
-            justify-content: space-around;
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            box-shadow: 0 -3px 8px rgba(0,0,0,0.15);
-        }
-
-        .tab-button {
-            flex: 1;
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            cursor: pointer;
-            padding: 12px 8px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 12px;
-            margin: 0 8px;
-            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tab-button:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .tab-button.active {
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(51, 144, 236, 0.5);
-        }
-
-        @media (min-width: 768px) {
-            .tab-button {
-                font-size: 16px;
-                padding: 15px 20px;
-                margin: 0 15px;
-            }
-
-            .tab-bar {
-                padding: 15px 0;
-            }
-        }
-
-        .search-bar {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .search-bar:focus {
-            border-color: var(--tg-theme-button-color);
-            outline: none;
-        }
-
-        .role-filter {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 16px;
-        }
-
-        .hero-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .hero-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            background: var(--tg-theme-secondary-bg-color);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .hero-item:hover {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            transform: translateY(-2px);
-        }
-
-        .hero-icon {
-            width: 80px;
-            height: 45px;
-            margin-right: 15px;
-            border-radius: 6px;
-            transition: transform 0.3s;
-        }
-
-        .hero-item:hover .hero-icon {
-            transform: scale(1.05);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: var(--tg-theme-bg-color);
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 90%;
-            max-height: 80%;
-            overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            transform: scale(0.8);
-            opacity: 0;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .close-button {
-            float: right;
-            cursor: pointer;
-            font-size: 24px;
-            color: var(--tg-theme-text-color);
-            transition: color 0.3s;
-        }
-
-        .close-button:hover {
-            color: var(--tg-theme-accent-color);
-        }
-
-        .counter-pick, .build-stage {
-            margin-bottom: 15px;
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .counter-pick strong, .build-stage strong {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 1.1em;
-        }
-
-        .ability-icon, .item-icon {
-            width: 32px;
-            height: 32px;
-            vertical-align: middle;
-            margin-right: 5px;
-        }
-
-        .counter-reason, .item-description {
-            font-size: 0.95em;
-            line-height: 1.5;
-            color: var(--tg-theme-text-color);
-        }
-
-        .profile-section {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--tg-theme-button-color);
-            animation: pulse-glow 2s infinite alternate ease-in-out;
-            margin-bottom: 20px;
-        }
-
-        @keyframes pulse-glow {
-            from {
-                box-shadow: 0 0 5px rgba(51, 144, 236, 0.3);
-                transform: scale(1);
-            }
-            to {
-                box-shadow: 0 0 20px rgba(51, 144, 236, 0.8);
-                transform: scale(1.05);
-            }
-        }
-
-        .profile-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-stats {
-            width: 100%;
-            margin-bottom: 20px;
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .stat-item {
-            padding: 10px 0;
-            text-align: center;
-            border-bottom: 1px solid var(--tg-theme-bg-color);
-            transition: transform 0.3s;
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .profile-settings {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .settings-button {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .settings-button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .subscription-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .subscription-modal.active {
-            display: flex;
-        }
-
-        .subscription-content {
-            background: var(--tg-theme-bg-color);
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 90%;
-            text-align: center;
-            transform: scale(0.8);
-            opacity: 0;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-
-        .subscription-modal.active .subscription-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .subscription-button {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            margin-top: 10px;
-            transition: background 0.3s, transform 0.2s;
-        }
-
-        .subscription-button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        .code-input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 16px;
-        }
+:root{--bg:#fff;--text:#000;--btn:#3390ec;--btn-text:#fff;--sec-bg:#f0f0f0;--accent:#ff4500}*{box-sizing:border-box}body{margin:0;padding:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}.app-container{display:flex;flex-direction:column;min-height:100vh;padding-bottom:env(safe-area-inset-bottom,0)}.tab-content{flex:1;overflow-y:auto;padding:10px 10px 70px;display:none;opacity:0;transition:opacity .3s,transform .3s;transform:translateY(20px);-webkit-overflow-scrolling:touch}.tab-content.active{display:block;opacity:1;transform:translateY(0)}.tab-bar{display:flex;justify-content:space-around;background:var(--sec-bg);padding:10px 0;position:fixed;bottom:0;width:100%;box-shadow:0 -2px 6px rgba(0,0,0,.1)}.tab-button{flex:1;border:none;cursor:pointer;padding:8px;font-size:15px;font-weight:500;border-radius:6px;margin:0 4px;background:var(--sec-bg);transition:background .2s,color .2s,transform .2s}.tab-button:hover,.tab-button.active{background:var(--btn);color:var(--btn-text);transform:scale(1.05)}.search-bar,.role-filter{width:100%;padding:10px;margin-bottom:10px;border:1px solid var(--sec-bg);border-radius:6px;background:var(--bg);color:var(--text);font-size:15px}.search-bar:focus,.role-filter:focus{border-color:var(--btn);outline:0}.hero-list{display:flex;flex-direction:column;gap:8px}.hero-item{display:flex;align-items:center;padding:10px;background:var(--sec-bg);border-radius:8px;cursor:pointer;transition:background .2s,transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.1)}.hero-item:hover{background:var(--btn);color:var(--btn-text);transform:translateY(-2px)}.hero-icon{width:70px;height:40px;margin-right:10px;border-radius:5px}.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}.modal-overlay.active{display:flex}.modal-content{background:var(--bg);padding:20px;border-radius:10px;max-width:90%;max-height:80%;overflow-y:auto;box-shadow:0 3px 15px rgba(0,0,0,.2);transform:scale(.8);opacity:0;transition:transform .3s,opacity .3s;-webkit-overflow-scrolling:touch}.modal-overlay.active .modal-content{transform:scale(1);opacity:1}.close-button{float:right;cursor:pointer;font-size:20px;color:var(--text);transition:color .2s}.close-button:hover{color:var(--accent)}.counter-pick,.build-stage{margin-bottom:10px;background:var(--sec-bg);padding:12px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);text-align:left}.counter-pick strong,.build-stage strong{display:block;margin-bottom:5px;font-size:1.05em}.ability-icon,.item-icon{width:28px;height:28px;vertical-align:middle;margin-right:5px}.counter-reason,.item-description{font-size:.9em;line-height:1.4;color:var(--text)}.profile-section{padding:15px;display:flex;flex-direction:column;align-items:center}.avatar{width:100px;height:100px;border-radius:50%;border:2px solid var(--btn);margin-bottom:15px}.profile-header{text-align:center;margin-bottom:15px}.profile-stats{width:100%;margin-bottom:15px;background:var(--sec-bg);padding:12px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1)}.stat-item{padding:8px 0;text-align:center;border-bottom:1px solid var(--bg);transition:transform .2s}.stat-item:last-child{border-bottom:0}.stat-item:hover{transform:translateY(-1px)}.profile-settings{width:100%;display:flex;flex-direction:column;gap:8px}.settings-button,.subscription-button{background:var(--btn);color:var(--btn-text);border:none;padding:10px;border-radius:6px;cursor:pointer;font-size:15px;transition:filter .2s,transform .2s}.settings-button:hover,.subscription-button:hover{filter:brightness(.9);transform:translateY(-2px)}.subscription-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}.subscription-modal.active{display:flex}.subscription-content{background:var(--bg);padding:20px;border-radius:10px;max-width:90%;text-align:center;transform:scale(.8);opacity:0;transition:transform .3s,opacity .3s}.subscription-modal.active .subscription-content{transform:scale(1);opacity:1}.code-input{width:100%;padding:10px;margin:8px 0;border:1px solid var(--sec-bg);border-radius:6px;background:var(--bg);color:var(--text);font-size:15px}
     </style>
 </head>
 <body>
@@ -389,11 +14,16 @@
         <div id="counter-picks" class="tab-content active">
             <select id="role-filter-counter" class="role-filter">
                 <option value="">Все роли</option>
-                <option value="Support">Support</option>
                 <option value="Carry">Carry</option>
-                <option value="Safelane Carry">Safelane Carry</option>
-                <option value="Midlane">Midlane</option>
+                <option value="Support">Support</option>
+                <option value="Nuker">Nuker</option>
+                <option value="Disabler">Disabler</option>
+                <option value="Initiator">Initiator</option>
+                <option value="Durable">Durable</option>
+                <option value="Escape">Escape</option>
+                <option value="Pusher">Pusher</option>
                 <option value="Offlane">Offlane</option>
+                <option value="Midlane">Midlane</option>
             </select>
             <input type="text" id="hero-search" class="search-bar" placeholder="Поиск героя...">
             <div class="hero-list" id="counter-hero-list"></div>
@@ -412,20 +42,14 @@
         </div>
         <div id="profile" class="tab-content">
             <div class="profile-section">
-                <img src="https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
+                <img src="https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
                 <div class="profile-header">
                     <h2>Ваш Профиль</h2>
                 </div>
                 <div class="profile-stats">
-                    <div class="stat-item">
-                        <strong>MMR:</strong> 4500
-                    </div>
-                    <div class="stat-item">
-                        <strong>Winrate:</strong> 55%
-                    </div>
-                    <div class="stat-item">
-                        <strong>Любимый герой:</strong> Rubick
-                    </div>
+                    <div class="stat-item"><strong>MMR:</strong> 4500</div>
+                    <div class="stat-item"><strong>Winrate:</strong> 55%</div>
+                    <div class="stat-item"><strong>Любимый герой:</strong> Rubick</div>
                 </div>
                 <div class="profile-settings">
                     <button class="settings-button">Изменить аватар</button>
@@ -435,256 +59,25 @@
             </div>
         </div>
         <div class="tab-bar">
-            <button class="tab-button active" data-tab="counter-picks">🛡️ Контрпики</button>
-            <button class="tab-button" data-tab="builds">🛠️ Билды</button>
-            <button class="tab-button" data-tab="profile">👤 Профиль</button>
+            <button class="tab-button active" data-tab="counter-picks">Counter Picks</button>
+            <button class="tab-button" data-tab="builds">Builds</button>
+            <button class="tab-button" data-tab="profile">Profile</button>
         </div>
         <div id="modal-overlay" class="modal-overlay">
             <div class="modal-content"></div>
         </div>
         <div id="subscription-modal" class="subscription-modal">
             <div class="subscription-content">
-                <h3>Подписка на Билды</h3>
-                <p>💳 Оплатите 99₽/месяц для доступа или введите код "123".</p>
+                <h3>Подписка на Builds</h3>
+                <p>💳 Оплатите 99₽/месяц или введите код "123".</p>
                 <button class="subscription-button" id="pay-button">Оплатить 99₽</button>
                 <input type="text" id="code-input" class="code-input" placeholder="Ввести код">
                 <button class="subscription-button" id="code-button">Ввести код</button>
             </div>
         </div>
     </div>
-
     <script>
-        console.log('Script loaded');
-
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#3390ec');
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#f0f0f0');
-
-        tg.onEvent('themeChanged', () => {
-            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
-            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
-            document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
-        });
-
-        let heroes = [];
-        let items = {};
-        let heroMap = {};
-
-        async function fetchData() {
-            try {
-                const heroesRes = await fetch('https://api.opendota.com/api/heroes');
-                heroes = await heroesRes.json();
-                heroes.forEach(h => {
-                    h.icon = `https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/${h.name.replace('npc_dota_hero_', '')}.png`;
-                    heroMap[h.id] = h;
-                });
-
-                const itemsRes = await itemsRes.json();
-                items = await itemsRes.json();
-            } catch (e) {
-                console.error('Error fetching data:', e);
-            }
-        }
-
-        function populateHeroes() {
-            const counterHeroList = document.getElementById('counter-hero-list');
-            const buildHeroList = document.getElementById('build-hero-list');
-            counterHeroList.innerHTML = '';
-            buildHeroList.innerHTML = '';
-            heroes.forEach((hero, index) => {
-                const counterItem = document.createElement('div');
-                counterItem.classList.add('hero-item');
-                counterItem.dataset.heroIndex = index;
-                counterItem.dataset.type = 'counter';
-                counterItem.dataset.roles = hero.roles.join(',');
-                counterItem.innerHTML = `
-                    <img src="${hero.icon}" alt="${hero.localized_name}" class="hero-icon">
-                    <span>${hero.localized_name}</span>
-                `;
-                counterHeroList.appendChild(counterItem);
-
-                const buildItem = document.createElement('div');
-                buildItem.classList.add('hero-item');
-                buildItem.dataset.heroIndex = index;
-                buildItem.dataset.type = 'build';
-                buildItem.dataset.roles = hero.roles.join(',');
-                buildItem.innerHTML = `
-                    <img src="${hero.icon}" alt="${hero.localized_name}" class="hero-icon">
-                    <span>${hero.localized_name}</span>
-                `;
-                buildHeroList.appendChild(buildItem);
-            });
-            console.log('Heroes populated:', heroes.length);
-        }
-
-        window.addEventListener('load', async () => {
-            await fetchData();
-            populateHeroes();
-        });
-
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                if (button.dataset.tab === 'builds' && !localStorage.getItem('subscribed')) {
-                    document.getElementById('subscription-modal').classList.add('active');
-                    return;
-                }
-
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                document.getElementById(button.dataset.tab).classList.add('active');
-
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-
-        document.getElementById('pay-button').addEventListener('click', () => {
-            localStorage.setItem('subscribed', 'true');
-            document.getElementById('subscription-modal').classList.remove('active');
-            document.getElementById('builds').classList.add('active');
-            document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
-            document.querySelector('.tab-button[data-tab="counter-picks"]').classList.remove('active');
-            document.getElementById('counter-picks').classList.remove('active');
-            alert('Подписка за 99₽ оформлена! Вкладка Билды доступна.');
-        });
-
-        document.getElementById('code-button').addEventListener('click', () => {
-            const code = document.getElementById('code-input').value;
-            if (code === '123') {
-                localStorage.setItem('subscribed', 'true');
-                document.getElementById('subscription-modal').classList.remove('active');
-                document.getElementById('builds').classList.add('active');
-                document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
-                document.querySelector('.tab-button[data-tab="counter-picks"]').classList.remove('active');
-                document.getElementById('counter-picks').classList.remove('active');
-                alert('Код верный! Вкладка Билды доступна.');
-            } else {
-                alert('Неверный код. Попробуйте "123".');
-            }
-        });
-
-        const modal = document.getElementById('modal-overlay');
-        const modalContent = modal.querySelector('.modal-content');
-
-        document.addEventListener('click', async (e) => {
-            const item = e.target.closest('.hero-item');
-            if (item) {
-                const index = parseInt(item.dataset.heroIndex);
-                const type = item.dataset.type;
-                const hero = heroes[index];
-                console.log('Hero clicked:', hero.localized_name, type);
-
-                let contentHTML = '';
-                if (type === 'counter') {
-                    const matchupsRes = await fetch(`https://api.opendota.com/api/heroes/${hero.id}/matchups`);
-                    const matchups = await matchupsRes.json();
-                    const sorted = matchups
-                        .filter(m => m.games_played > 100)
-                        .map(m => ({...m, winrate: m.wins / m.games_played}))
-                        .sort((a, b) => a.winrate - b.winrate)
-                        .slice(0, 3);
-                    const countersHTML = sorted.map(m => {
-                        const counterHero = heroMap[m.hero_id];
-                        const advantage = ((0.5 - m.winrate) * 100).toFixed(2); // Advantage for counter
-                        return `
-                            <div class="counter-pick">
-                                <strong>${counterHero ? counterHero.localized_name : 'Unknown'}</strong>
-                                <div class="counter-reason">${hero.localized_name} имеет всего ${(m.winrate * 100).toFixed(2)}% винрейта против этого героя. Это делает его сильным контрпиком, так как статистика показывает, что ${counterHero.localized_name} эффективно противостоит способностям и стилю игры ${hero.localized_name}. Например, механики контроля или дамаг, которые эксплуатируют слабости ${hero.localized_name}.</div>
-                            </div>
-                        `;
-                    }).join('');
-                    contentHTML = `
-                        <span class="close-button">×</span>
-                        <h3>Контр-пики для ${hero.localized_name}</h3>
-                        ${countersHTML}
-                    `;
-                } else if (type === 'build') {
-                    const popRes = await fetch(`https://api.opendota.com/api/heroes/${hero.id}/itemPopularity`);
-                    const pop = await popRes.json();
-                    const stages = {
-                        starting: {name: 'Starting Items (0-5 мин)', data: pop.start_game_items || {}},
-                        early: {name: 'Early Game (5-15 мин)', data: pop.early_game_items || {}},
-                        mid: {name: 'Mid Game (15-30 мин)', data: pop.mid_game_items || {}},
-                        late: {name: 'Late Game (30+ мин)', data: pop.late_game_items || {}}
-                    };
-                    const buildsHTML = Object.values(stages).map(stage => {
-                        const itemsList = Object.entries(stage.data)
-                            .sort((a, b) => b[1] - a[1])
-                            .slice(0, 5)
-                            .map(([key, count]) => {
-                                const item = items[key];
-                                if (!item) return '';
-                                const imgName = item.img.split('/').pop().split('?')[0];
-                                const icon = `https://cdn.dota2.com/apps/dota2/images/dota_react/items/${imgName}`;
-                                const desc = item.desc ? item.desc.replace(/\\n/g, ' ').substring(0, 100) + '...' : 'No description';
-                                return `
-                                    <p><img src="${icon}" alt="${item.dname}" class="item-icon"> ${item.dname} (тайминг: ${stage.name.split(' (')[1].slice(0, -1)}, популярность: ${count}): <span class="item-description">${desc}</span></p>
-                                `;
-                            }).join('');
-                        return `
-                            <div class="build-stage">
-                                <strong>${stage.name}</strong>
-                                ${itemsList}
-                            </div>
-                        `;
-                    }).join('');
-                    contentHTML = `
-                        <span class="close-button">×</span>
-                        <h3>Сборка для ${hero.localized_name} - Роль: ${hero.roles.join(', ')}</h3>
-                        ${buildsHTML}
-                    `;
-                }
-
-                modalContent.innerHTML = contentHTML;
-                modal.classList.add('active');
-                console.log('Modal opened with content for:', hero.localized_name);
-            }
-
-            if (e.target.classList.contains('close-button') || e.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-
-        const counterSearchInput = document.getElementById('hero-search');
-        const counterRoleFilter = document.getElementById('role-filter-counter');
-        function filterCounterHeroes() {
-            const query = counterSearchInput.value.toLowerCase();
-            const role = counterRoleFilter.value;
-            document.querySelectorAll('#counter-hero-list .hero-item').forEach(item => {
-                const name = item.querySelector('span').textContent.toLowerCase();
-                const heroRoles = item.dataset.roles;
-                const matchesSearch = name.includes(query);
-                const matchesRole = !role || heroRoles.includes(role);
-                item.style.display = matchesSearch && matchesRole ? 'flex' : 'none';
-            });
-        }
-
-        counterSearchInput.addEventListener('input', filterCounterHeroes);
-        counterRoleFilter.addEventListener('change', filterCounterHeroes);
-
-        const buildSearchInput = document.getElementById('build-search');
-        const buildRoleFilter = document.getElementById('role-filter-build');
-        function filterBuildHeroes() {
-            const query = buildSearchInput.value.toLowerCase();
-            const role = buildRoleFilter.value;
-            document.querySelectorAll('#build-hero-list .hero-item').forEach(item => {
-                const name = item.querySelector('span').textContent.toLowerCase();
-                const heroRoles = item.dataset.roles;
-                const matchesSearch = name.includes(query);
-                const matchesRole = !role || heroRoles.includes(role);
-                item.style.display = matchesSearch && matchesRole ? 'flex' : 'none';
-            });
-        }
-
-        buildSearchInput.addEventListener('input', filterBuildHeroes);
-        buildRoleFilter.addEventListener('change', filterBuildHeroes);
+const tg=window.Telegram.WebApp;tg.ready();tg.expand();function applyTheme(){const t=tg.themeParams;document.documentElement.style.setProperty('--bg',t.bg_color||'#fff');document.documentElement.style.setProperty('--text',t.text_color||'#000');document.documentElement.style.setProperty('--btn',t.button_color||'#3390ec');document.documentElement.style.setProperty('--btn-text',t.button_text_color||'#fff');document.documentElement.style.setProperty('--sec-bg',t.secondary_bg_color||'#f0f0f0')}applyTheme();tg.onEvent('themeChanged',applyTheme);const heroes=[{name:'Rubick',slug:'rubick',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/rubick.png',role:'Support',counters:[{counterHero:'Templar Assassin',disadvantage:'1.89%',reason:'Templar Assassin can deal high burst damage and has mobility with Meld and Psionic Traps, making it hard for Rubick to steal and utilize effectively.',ability:'Meld',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/templar_assassin_meld.png'},{counterHero:'Tusk',disadvantage:'1.88%',reason:'Tusk\'s Snowball and Walrus Punch can disrupt Rubick\'s positioning and spell casting, reducing his effectiveness in team fights.',ability:'Snowball',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/tusk_snowball.png'},{counterHero:'Elder Titan',disadvantage:'1.82%',reason:'Elder Titan\'s Echo Stomp can put Rubick to sleep, preventing him from casting spells, including stolen abilities.',ability:'Echo Stomp',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/elder_titan_echo_stomp.png'},{counterHero:'Ember Spirit',disadvantage:'1.80%',reason:'Ember Spirit\'s mobility with Sleight of Fist and Flame Guard can outmaneuver Rubick and burn through his mana, limiting his spell usage.',ability:'Sleight of Fist',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/ember_spirit_sleight_of_fist.png'},{counterHero:'Razor',disadvantage:'1.65%',reason:'Razor\'s Static Link drains Rubick\'s damage output and mana, making it difficult for Rubick to sustain his spell casting.',ability:'Static Link',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/razor_static_link.png'}],builds:{starting:[{name:'Tango',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/tango.png',timing:'0-5 мин',description:'Health regen.'},{name:'Clarity',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/clarity.png',timing:'0-5 мин',description:'Mana regen.'}],early:[{name:'Magic Stick',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/magic_stick.png',timing:'3-9 мин',description:'Burst mana/health.'},{name:'Boots of Speed',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/boots.png',timing:'3-6 мин',description:'Movement speed.'}],mid:[{name:'Glimmer Cape',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/glimmer_cape.png',timing:'9 мин',description:'Invisibility.'},{name:'Aether Lens',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/aether_lens.png',timing:'25 мин',description:'Cast range.'}],late:[{name:'Lotus Orb',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/lotus_orb.png',timing:'29 мин',description:'Spell reflection.'},{name:'Aghanim\'s Scepter',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/ultimate_scepter.png',timing:'38 мин',description:'Enhances abilities.'}]}},{name:'Wraith King',slug:'wraith-king',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/skeleton_king.png',role:'Carry',counters:[{counterHero:'Necrophos',disadvantage:'5.49%',reason:'Necrophos\'s Heartstopper Aura reduces Wraith King\'s health over time, countering his durability.',ability:'Heartstopper Aura',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/necrophos_heartstopper_aura.png'},{counterHero:'Underlord',disadvantage:'5.65%',reason:'Underlord\'s Firestorm and Pit of Malice can lock down and damage Wraith King, disrupting his positioning.',ability:'Firestorm',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/underlord_firestorm.png'},{counterHero:'Phantom Lancer',disadvantage:'4.38%',reason:'Phantom Lancer\'s illusions confuse Wraith King, making it hard for him to focus and deal damage effectively.',ability:'Doppelganger',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/phantom_lancer_doppelwalk.png'},{counterHero:'Warlock',disadvantage:'3.97%',reason:'Warlock\'s Upheaval slows Wraith King, reducing his effectiveness in fights and making him vulnerable.',ability:'Upheaval',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/warlock_upheaval.png'},{counterHero:'Chen',disadvantage:'3.90%',reason:'Chen\'s Holy Persuasion and Test of Faith can harass and damage Wraith King early, hindering his farm.',ability:'Test of Faith',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/chen_test_of_faith.png'}],builds:{starting:[{name:'Tango',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/tango.png',timing:'0-5 мин',description:'Health regen.'},{name:'Quelling Blade',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/quelling_blade.png',timing:'0-5 мин',description:'Creep damage.'}],early:[{name:'Phase Boots',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/phase_boots.png',timing:'6-9 мин',description:'Speed.'},{name:'Magic Wand',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/magic_wand.png',timing:'1-6 мин',description:'Burst heal/mana.'}],mid:[{name:'Blink Dagger',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/blink.png',timing:'17-22 мин',description:'Initiation.'},{name:'Black King Bar',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/black_king_bar.png',timing:'21-27 мин',description:'Spell immunity.'}],late:[{name:'Assault Cuirass',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/assault.png',timing:'29-36 мин',description:'Armor and attack.'},{name:'Overwhelming Blink',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/overwhelming_blink.png',timing:'32-46 мин',description:'Damage on blink.'}]}},{name:'Morphling',slug:'morphling',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/morphling.png',role:'Carry',counters:[{counterHero:'Doom',disadvantage:'4.50%',reason:'Doom disables Morphling\'s abilities, preventing attribute shift and escape.',ability:'Doom',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/doom_bringer_doom.png'},{counterHero:'Bane',disadvantage:'3.80%',reason:'Bane\'s Nightmare and Fiend\'s Grip control Morphling, limiting his mobility and damage.',ability:'Nightmare',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/bane_nightmare.png'},{counterHero:'Axe',disadvantage:'3.50%',reason:'Axe\'s Berserker\'s Call forces Morphling into close combat, where he is vulnerable.',ability:'Berserker\'s Call',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/axe_berserkers_call.png'},{counterHero:'Ancient Apparition',disadvantage:'3.20%',reason:'Ancient Apparition\'s Ice Blast prevents Morphling from healing, countering his tankiness.',ability:'Ice Blast',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/ancient_apparition_ice_blast.png'},{counterHero:'Lion',disadvantage:'3.00%',reason:'Lion\'s disables and burst damage exploit Morphling\'s low health pool in early game.',ability:'Hex',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/lion_voodoo.png'}],builds:{starting:[{name:'Tango',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/tango.png',timing:'0-5 мин',description:'Health regen.'},{name:'Iron Branch',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/branches.png',timing:'0-5 мин',description:'Stats.'}],early:[{name:'Power Treads',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/power_treads.png',timing:'5-7 мин',description:'Attribute switch.'},{name:'Morbid Mask',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/morbid_mask.png',timing:'8 мин',description:'Lifesteal.'}],mid:[{name:'Manta Style',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/manta.png',timing:'16-21 мин',description:'Illusions.'},{name:'Hurricane Pike',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/hurricane_pike.png',timing:'22-26 мин',description:'Range.'}],late:[{name:'Butterfly',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/butterfly.png',timing:'35 мин',description:'Damage and evasion.'},{name:'Satanic',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/satanic.png',timing:'39-40 мин',description:'Lifesteal.'}]}},{name:'Slark',slug:'slark',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/slark.png',role:'Carry',counters:[{counterHero:'Leshrac',disadvantage:'4.54%',reason:'Leshrac\'s high burst damage and area control with abilities like Lightning Storm and Pulse Nova can punish Slark\'s low armor and reliance on mobility.',ability:'Pulse Nova',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/leshrac_pulse_nova.png'},{counterHero:'Grimstroke',disadvantage:'4.30%',reason:'Grimstroke\'s ability to disable and deal damage over time with Ink Swell and Soulbind can lock down Slark, preventing his escape and lifesteal.',ability:'Soulbind',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/grimstroke_soulbind.png'},{counterHero:'Disruptor',disadvantage:'4.25%',reason:'Disruptor\'s Kinetic Field and Glimpse can isolate and reposition Slark, disrupting his ability to jump in and out of fights.',ability:'Kinetic Field',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/disruptor_kinetic_field.png'},{counterHero:'Mars',disadvantage:'3.25%',reason:'Mars\' Arena Of Blood and Spear of Mars can lock Slark in place, preventing his mobility and making him vulnerable to team focus.',ability:'Arena Of Blood',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/mars_arena_of_blood.png'},{counterHero:'Night Stalker',disadvantage:'3.02%',reason:'Night Stalker\'s high damage and Crippling Fear can reduce Slark\'s effectiveness in fights, especially during night time when Night Stalker is strongest.',ability:'Crippling Fear',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/night_stalker_crippling_fear.png'}],builds:{starting:[{name:'Tango',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/tango.png',timing:'0-5 мин',description:'Health regen.'},{name:'Iron Branch',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/branches.png',timing:'0-5 мин',description:'Stats.'}],early:[{name:'Power Treads',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/power_treads.png',timing:'4 мин',description:'Stats and attack.'},{name:'Wraith Band',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/wraith_band.png',timing:'3 мин',description:'Attributes.'}],mid:[{name:'Diffusal Blade',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/diffusal_blade.png',timing:'6 мин',description:'Mana burn.'},{name:'Echo Sabre',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/echo_sabre.png',timing:'23 мин',description:'Double strike.'}],late:[{name:'Black King Bar',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/black_king_bar.png',timing:'34 мин',description:'Spell immunity.'},{name:'Abyssal Blade',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/abyssal_blade.png',timing:'34 мин',description:'Stun.'}]}},{name:'Medusa',slug:'medusa',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/medusa.png',role:'Carry',counters:[{counterHero:'Anti-Mage',disadvantage:'11.25%',reason:'Anti-Mage\'s high physical damage and mobility allow him to kite Medusa, exploiting her lack of mobility and reliance on tankiness.',ability:'Mana Break',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/antimage_mana_break.png'},{counterHero:'Dark Seer',disadvantage:'6.16%',reason:'Dark Seer\'s Ion Shell and Surge can wear down Medusa in lane and disrupt her positioning in fights.',ability:'Ion Shell',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/dark_seer_ion_shell.png'},{counterHero:'Centaur Warrunner',disadvantage:'5.05%',reason:'Centaur Warrunner\'s high armor and Double Edge can deal significant burst damage to Medusa, countering her tankiness.',ability:'Double Edge',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/centaur_double_edge.png'},{counterHero:'Nyx Assassin',disadvantage:'4.85%',reason:'Nyx Assassin\'s burst damage and Impale can interrupt Medusa\'s abilities and kill her before she scales.',ability:'Impale',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/nyx_assassin_impale.png'},{counterHero:'Slark',disadvantage:'4.42%',reason:'Slark\'s high mobility and Pounce allow him to jump on Medusa, draining her attributes and preventing her from farming safely.',ability:'Pounce',abilityIcon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/abilities/slark_pounce.png'}],builds:{starting:[{name:'Tango',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/tango.png',timing:'0-5 мин',description:'Health regen.'},{name:'Iron Branch',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/branches.png',timing:'0-5 мин',description:'Stats.'}],early:[{name:'Power Treads',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/power_treads.png',timing:'6 мин',description:'Attribute boots.'},{name:'Maelstrom',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/maelstrom.png',timing:'10 мин',description:'Farm.'}],mid:[{name:'Manta Style',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/manta.png',timing:'23 мин',description:'Illusions.'},{name:'Hurricane Pike',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/hurricane_pike.png',timing:'15 мин',description:'Mobility.'}],late:[{name:'Butterfly',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/butterfly.png',timing:'30 мин',description:'Damage and evasion.'},{name:'Satanic',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/items/satanic.png',timing:'32 мин',description:'Lifesteal.'}]}},{name:'Abaddon',slug:'abaddon',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/abaddon.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Alchemist',slug:'alchemist',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/alchemist.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Ancient Apparition',slug:'ancient-apparition',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/ancient_apparition.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Anti-Mage',slug:'anti-mage',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/antimage.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Arc Warden',slug:'arc-warden',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/arc_warden.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Axe',slug:'axe',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/axe.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Bane',slug:'bane',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/bane.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Batrider',slug:'batrider',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/batrider.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Beastmaster',slug:'beastmaster',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/beastmaster.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Bloodseeker',slug:'bloodseeker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/bloodseeker.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Bounty Hunter',slug:'bounty-hunter',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/bounty_hunter.png',role:'Escape',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Brewmaster',slug:'brewmaster',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/brewmaster.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Bristleback',slug:'bristleback',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/bristleback.png',role:'Durable',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Broodmother',slug:'broodmother',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/broodmother.png',role:'Pusher',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Centaur Warrunner',slug:'centaur-warrunner',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/centaur.png',role:'Durable',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Chaos Knight',slug:'chaos-knight',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/chaos_knight.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Chen',slug:'chen',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/chen.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Clinkz',slug:'clinkz',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/clinkz.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Clockwerk',slug:'clockwerk',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/clockwerk.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Crystal Maiden',slug:'crystal-maiden',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/crystal_maiden.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Dark Seer',slug:'dark-seer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/dark_seer.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Dark Willow',slug:'dark-willow',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/dark_willow.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Dazzle',slug:'dazzle',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/dazzle.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Death Prophet',slug:'death-prophet',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/death_prophet.png',role:'Pusher',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Disruptor',slug:'disruptor',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/disruptor.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Doom',slug:'doom',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/doom_bringer.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Dragon Knight',slug:'dragon-knight',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/dragon_knight.png',role:'Pusher',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Drow Ranger',slug:'drow-ranger',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/drow_ranger.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Earth Spirit',slug:'earth-spirit',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/earth_spirit.png',role:'Nuker',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Earthshaker',slug:'earthshaker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/earthshaker.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Elder Titan',slug:'elder-titan',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/elder_titan.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Ember Spirit',slug:'ember-spirit',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/ember_spirit.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Enchantress',slug:'enchantress',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/enchantress.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Enigma',slug:'enigma',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/enigma.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Faceless Void',slug:'faceless-void',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/faceless_void.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Grimstroke',slug:'grimstroke',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/grimstroke.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Gyrocopter',slug:'gyrocopter',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/gyrocopter.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Hoodwink',slug:'hoodwink',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/hoodwink.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Huskar',slug:'huskar',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/huskar.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Invoker',slug:'invoker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/invoker.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Io',slug:'io',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/wisp.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Jakiro',slug:'jakiro',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/jakiro.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Juggernaut',slug:'juggernaut',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/juggernaut.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Keeper of the Light',slug:'keeper-of-the-light',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/keeper_of_the_light.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Kunkka',slug:'kunkka',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/kunkka.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Legion Commander',slug:'legion-commander',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/legion_commander.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Leshrac',slug:'leshrac',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/leshrac.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lich',slug:'lich',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lich.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lifestealer',slug:'lifestealer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lifestealer.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lina',slug:'lina',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lina.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lion',slug:'lion',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lion.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lone Druid',slug:'lone-druid',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lone_druid.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Luna',slug:'luna',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/luna.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Lycan',slug:'lycan',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/lycan.png',role:'Pusher',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Magnus',slug:'magnus',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/magnataur.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Marci',slug:'marci',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/marci.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Mars',slug:'mars',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/mars.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Muerta',slug:'muerta',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/muerta.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Naga Siren',slug:'naga-siren',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/naga_siren.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Nature\'s Prophet',slug:'natures-prophet',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/furion.png',role:'Pusher',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Necrophos',slug:'necrophos',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/necrophos.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Night Stalker',slug:'night-stalker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/night_stalker.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Nyx Assassin',slug:'nyx-assassin',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/nyx_assassin.png',role:'Disabler',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Ogre Magi',slug:'ogre-magi',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/ogre_magi.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Omniknight',slug:'omniknight',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/omniknight.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Oracle',slug:'oracle',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/oracle.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Outworld Destroyer',slug:'outworld-destroyer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/outworld_destroyer.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Pangolier',slug:'pangolier',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/pangolier.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Phantom Assassin',slug:'phantom-assassin',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/phantom_assassin.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Phantom Lancer',slug:'phantom-lancer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/phantom_lancer.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Phoenix',slug:'phoenix',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/phoenix.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Primal Beast',slug:'primal-beast',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/primal_beast.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Puck',slug:'puck',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/puck.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Pudge',slug:'pudge',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/pudge.png',role:'Disabler',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Pugna',slug:'pugna',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/pugna.png',role:'Nuker',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Queen of Pain',slug:'queen-of-pain',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/queenofpain.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Razor',slug:'razor',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/razor.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Riki',slug:'riki',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/riki.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Sand King',slug:'sand-king',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/sand_king.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Shadow Demon',slug:'shadow-demon',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/shadow_demon.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Shadow Fiend',slug:'shadow-fiend',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/nevermore.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Shadow Shaman',slug:'shadow-shaman',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/shadow_shaman.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Silencer',slug:'silencer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/silencer.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Skywrath Mage',slug:'skywrath-mage',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/skywrath_mage.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Slardar',slug:'slardar',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/slardar.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Snapfire',slug:'snapfire',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/snapfire.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Sniper',slug:'sniper',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/sniper.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Spectre',slug:'spectre',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/spectre.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Spirit Breaker',slug:'spirit-breaker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/spirit_breaker.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Storm Spirit',slug:'storm-spirit',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/storm_spirit.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Sven',slug:'sven',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/sven.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Techies',slug:'techies',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/techies.png',role:'Nuker',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Templar Assassin',slug:'templar-assassin',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/templar_assassin.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Terrorblade',slug:'terrorblade',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/terrorblade.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Tidehunter',slug:'tidehunter',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/tidehunter.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Timbersaw',slug:'timbersaw',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/shredder.png',role:'Offlane',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Tinker',slug:'tinker',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/tinker.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Tiny',slug:'tiny',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/tiny.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Treant Protector',slug:'treant-protector',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/treant.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Troll Warlord',slug:'troll-warlord',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/troll_warlord.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Tusk',slug:'tusk',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/tusk.png',role:'Initiator',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Underlord',slug:'underlord',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/abyssal_underlord.png',role:'Offlane',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Undying',slug:'undying',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/undying.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Ursa',slug:'ursa',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/ursa.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Vengeful Spirit',slug:'vengeful-spirit',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/vengefulspirit.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Venomancer',slug:'venomancer',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/venomancer.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Viper',slug:'viper',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/viper.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Visage',slug:'visage',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/visage.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Void Spirit',slug:'void-spirit',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/void_spirit.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Warlock',slug:'warlock',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/warlock.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Weaver',slug:'weaver',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/weaver.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Windranger',slug:'windranger',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/windrunner.png',role:'Carry',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Winter Wyvern',slug:'winter-wyvern',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/winter_wyvern.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Witch Doctor',slug:'witch-doctor',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/witch_doctor.png',role:'Support',counters:[],builds:{starting:[],early:[],mid:[],late:[]}},{name:'Zeus',slug:'zeus',icon:'https://steamcdn-a.akamaihd.net/apps/dota2/images/dota_react/heroes/zeus.png',role:'Nuker',counters:[],builds:{starting:[],early:[],mid:[],late:[]}}];function populateHeroes(){const c=document.getElementById('counter-hero-list'),b=document.getElementById('build-hero-list');c.innerHTML='';b.innerHTML='';heroes.forEach((h,i)=>{const ci=document.createElement('div');ci.classList.add('hero-item');ci.dataset.heroIndex=i;ci.dataset.type='counter';ci.dataset.role=h.role;ci.innerHTML=`<img src="${h.icon}" alt="${h.name}" class="hero-icon"><span>${h.name}</span>`;c.appendChild(ci);const bi=document.createElement('div');bi.classList.add('hero-item');bi.dataset.heroIndex=i;bi.dataset.type='build';bi.dataset.role=h.role;bi.innerHTML=`<img src="${h.icon}" alt="${h.name}" class="hero-icon"><span>${h.name}</span>`;b.appendChild(bi)})}populateHeroes();document.querySelectorAll('.tab-button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='builds'&&!localStorage.getItem('subscribed'))return document.getElementById('subscription-modal').classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById(b.dataset.tab).classList.add('active');document.querySelectorAll('.tab-button').forEach(btn=>btn.classList.remove('active'));b.classList.add('active')}));document.getElementById('pay-button').addEventListener('click',()=>{localStorage.setItem('subscribed','true');document.getElementById('subscription-modal').classList.remove('active');document.getElementById('builds').classList.add('active');document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');document.querySelector('.tab-button[data-tab="counter-picks"]').classList.remove('active');document.getElementById('counter-picks').classList.remove('active');alert('Подписка оформлена! Builds доступна.')});document.getElementById('code-button').addEventListener('click',()=>{if(document.getElementById('code-input').value==='123'){localStorage.setItem('subscribed','true');document.getElementById('subscription-modal').classList.remove('active');document.getElementById('builds').classList.add('active');document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');document.querySelector('.tab-button[data-tab="counter-picks"]').classList.remove('active');document.getElementById('counter-picks').classList.remove('active');alert('Код верный! Builds доступна.')}else{alert('Неверный код. Попробуйте "123".')}});const modal=document.getElementById('modal-overlay'),modalContent=modal.querySelector('.modal-content');document.addEventListener('click',e=>{if(e.target.classList.contains('hero-item')){const h=heroes[e.target.dataset.heroIndex],t=e.target.dataset.type;let content='';if(t==='counter'){h.counters.sort((a,b)=>parseFloat(b.disadvantage)-parseFloat(a.disadvantage));content=`<span class="close-button">×</span><h3>Контр-пики для ${h.name}</h3>${h.counters.length > 0 ? h.counters.map(c => `<div class="counter-pick"><strong>${c.counterHero} (${c.disadvantage})</strong><p><img src="${c.abilityIcon}" alt="${c.ability}" class="ability-icon"> ${c.ability}</p><div class="counter-reason">${c.reason}</div></div>`).join('') : '<p>Нет статических данных о контр-пиках.</p>'}`;}else if(t==='build'){content=`<span class="close-button">×</span><h3>Сборка для ${h.name} - ${h.role}</h3><div class="build-stage"><strong>Starting (0-5 мин)</strong>${h.builds.starting.map(i=>`<p><img src="${i.icon}" alt="${i.name}" class="item-icon"> ${i.name} (${i.timing}): <span class="item-description">${i.description}</span></p>`).join('') || '<p>Нет данных</p>'}</div><div class="build-stage"><strong>Early (5-15 мин)</strong>${h.builds.early.map(i=>`<p><img src="${i.icon}" alt="${i.name}" class="item-icon"> ${i.name} (${i.timing}): <span class="item-description">${i.description}</span></p>`).join('') || '<p>Нет данных</p>'}</div><div class="build-stage"><strong>Mid (15-30 мин)</strong>${h.builds.mid.map(i=>`<p><img src="${i.icon}" alt="${i.name}" class="item-icon"> ${i.name} (${i.timing}): <span class="item-description">${i.description}</span></p>`).join('') || '<p>Нет данных</p>'}</div><div class="build-stage"><strong>Late (30+ мин)</strong>${h.builds.late.map(i=>`<p><img src="${i.icon}" alt="${i.name}" class="item-icon"> ${i.name} (${i.timing}): <span class="item-description">${i.description}</span></p>`).join('') || '<p>Нет данных</p>'}</div>`;}modalContent.innerHTML=content;modal.classList.add('active')}if(e.target.classList.contains('close-button')||e.target===modal)modal.classList.remove('active')});function filterHeroes(t){const s=document.getElementById(t==='counter'?'hero-search':'build-search').value.toLowerCase(),r=document.getElementById(`role-filter-${t}`).value;document.querySelectorAll(`#${t}-hero-list .hero-item`).forEach(i=>{const n=i.querySelector('span').textContent.toLowerCase(),hr=i.dataset.role;i.style.display=n.includes(s)&&(!r||hr===r)?'flex':'none'})}['counter','build'].forEach(t=>{const s=document.getElementById(t==='counter'?'hero-search':'build-search'),r=document.getElementById(`role-filter-${t}`);s.addEventListener('input',()=>filterHeroes(t));r.addEventListener('change',()=>filterHeroes(t))});
     </script>
 </body>
 </html>
