@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOTA 2 Helper - Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-button-color: #3390ec;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f0f0f0;
+            --tg-theme-accent-color: #ff4500;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-height: 100vh;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; /* Increased for tab-bar */
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 12px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -3px 8px rgba(0,0,0,0.15);
+        }
+
+        .tab-button {
+            flex: 1;
+            margin: 0 5px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        .tab-button:hover {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            transform: scale(1.05);
+        }
+
+        .tab-button.active {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            transform: scale(1.05);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--tg-theme-button-color);
+            outline: none;
+        }
+
+        .role-filter {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 16px;
+        }
+
+        .hero-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hero-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-item:hover {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            transform: translateY(-2px);
+        }
+
+        .hero-icon {
+            width: 80px;
+            height: 45px;
+            margin-right: 15px;
+            border-radius: 6px;
+            transition: transform 0.3s;
+        }
+
+        .hero-item:hover .hero-icon {
+            transform: scale(1.05);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeInOverlay 0.3s ease-out;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-overlay.closing {
+            animation: fadeOutOverlay 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeOutOverlay {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .modal-content {
+            background: var(--tg-theme-bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transform: scale(0.7) translateY(50px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease-out;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .close-button {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--tg-theme-text-color);
+            transition: color 0.3s;
+        }
+
+        .close-button:hover {
+            color: var(--tg-theme-accent-color);
+        }
+
+        .counter-pick, .build-stage {
+            margin-bottom: 15px;
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .counter-pick strong, .build-stage strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .ability-icon, .item-icon {
+            width: 32px;
+            height: 32px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        .counter-reason, .item-description {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: var(--tg-theme-text-color);
+        }
+
+        .profile-section {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--tg-theme-button-color);
+            animation: glow 2.5s infinite alternate ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(51, 144, 236, 0.3); }
+            to { box-shadow: 0 0 20px rgba(51, 144, 236, 0.8); }
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-stats {
+            width: 100%;
+            margin-bottom: 20px;
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            padding: 10px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--tg-theme-bg-color);
+            transition: transform 0.3s;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .profile-settings {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .settings-button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .settings-button:hover {
+            background: darken(var(--tg-theme-button-color), 10%);
+            transform: translateY(-2px);
+        }
+
+        .subscription-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeInOverlay 0.3s ease-out;
+        }
+
+        .subscription-content {
+            background: var(--tg-theme-bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%;
+            text-align: center;
+            transform: scale(0.7) translateY(50px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease-out;
+        }
+
+        .subscription-modal.active .subscription-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .subscription-button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .subscription-button:hover {
+            background: darken(var(--tg-theme-button-color), 10%);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="counter-picks" class="tab-content" style="display: block;">
+            <select id="role-filter-counter" class="role-filter">
+                <option value="">Все роли</option>
+                <option value="Support">Support</option>
+                <option value="Carry">Carry</option>
+                <option value="Safelane Carry">Safelane Carry</option>
+                <option value="Midlane">Midlane</option>
+                <option value="Offlane">Offlane</option>
+            </select>
+            <input type="text" id="hero-search" class="search-bar" placeholder="Поиск героя...">
+            <div class="hero-list" id="counter-hero-list"></div>
+        </div>
+        <div id="builds" class="tab-content" style="display: none;">
+            <select id="role-filter-build" class="role-filter">
+                <option value="">Все роли</option>
+                <option value="Support">Support</option>
+                <option value="Carry">Carry</option>
+                <option value="Safelane Carry">Safelane Carry</option>
+                <option value="Midlane">Midlane</option>
+                <option value="Offlane">Offlane</option>
+            </select>
+            <input type="text" id="build-search" class="search-bar" placeholder="Поиск героя...">
+            <div class="hero-list" id="build-hero-list"></div>
+        </div>
+        <div id="profile" class="tab-content" style="display: none;">
+            <div class="profile-section">
+                <img src="https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
+                <div class="profile-header">
+                    <h2>Ваш Профиль</h2>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <strong>MMR:</strong> 4500
+                    </div>
+                    <div class="stat-item">
+                        <strong>Winrate:</strong> 55%
+                    </div>
+                    <div class="stat-item">
+                        <strong>Любимый герой:</strong> Rubick
+                    </div>
+                </div>
+                <div class="profile-settings">
+                    <button class="settings-button">Изменить аватар</button>
+                    <button class="settings-button">Настройки уведомлений</button>
+                    <button class="settings-button">Поделиться профилем</button>
+                </div>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <button class="tab-button active" data-tab="counter-picks">Counter Picks</button>
+            <button class="tab-button" data-tab="builds">Builds</button>
+            <button class="tab-button" data-tab="profile">Profile</button>
+        </div>
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal-content"></div>
+        </div>
+        <div id="subscription-modal" class="subscription-modal">
+            <div class="subscription-content">
+                <h3>Подписка для доступа к Builds</h3>
+                <p>Оформите подписку за 99₽, чтобы получить доступ к вкладке Builds.</p>
+                <button id="subscribe-button" class="subscription-button">Оплатить 99₽</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Apply theme
+        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+        document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#3390ec');
+        document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#f0f0f0');
+
+        tg.onEvent('themeChanged', () => {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+            document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.dataset.tab === 'builds' && !localStorage.getItem('subscribed')) {
+                    document.getElementById('subscription-modal').style.display = 'flex';
+                    document.getElementById('subscription-modal').classList.add('active');
+                    return;
+                }
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(button.dataset.tab).style.display = 'block';
+
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Subscription handling
+        document.getElementById('subscribe-button').addEventListener('click', () => {
+            // Simulate payment (replace with Telegram Payments API in production)
+            localStorage.setItem('subscribed', 'true');
+            document.getElementById('subscription-modal').style.display = 'none';
+            document.getElementById('builds').style.display = 'block';
+            document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
+            document.querySelector('.tab-button[data-tab="counter-picks"]').classList.remove('active');
+            document.getElementById('counter-picks').style.display = 'none';
+            alert('Подписка за 99₽ оформлена! Вкладка Builds теперь доступна.');
+        });
+
+        // Modal handling
+        const modal = document.getElementById('modal-overlay');
+        const modalContent = modal.querySelector('.modal-content');
+
+        function closeModal() {
+            modal.classList.add('closing');
+            setTimeout(() => {
+                modal.classList.remove('active', 'closing');
+            }, 300);
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Data for Heroes
+        const heroes = [
+            {
+                name: 'Rubick',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/rubick.png',
+                counters: [
+                    { name: 'Elder Titan', ability: 'Echo Stomp', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/elder_titan_echo_stomp.png', reason: 'Прерывает позиционирование Rubick и кражу спелов.' },
+                    { name: 'Templar Assassin', ability: 'Meld', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/templar_assassin_meld.png', reason: 'Высокий burst-дамаг и мобильность.' },
+                    { name: 'Tusk', ability: 'Walrus Punch', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/tusk_walrus_punch.png', reason: 'Сильный контроль и инициация.' }
+                ],
+                role: 'Support',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Consumable for health regeneration.' },
+                        { name: 'Healing Salve', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/healing_salve.png', timing: '0-5 мин', description: 'Consumable for burst health regeneration.' },
+                        { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/clarity.png', timing: '0-5 мин', description: 'Consumable for mana regeneration.' }
+                    ],
+                    early: [
+                        { name: 'Magic Stick', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/magic_stick.png', timing: '3-9 мин', description: 'Provides burst mana and health regeneration.' },
+                        { name: 'Boots of Speed', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/boots.png', timing: '3-6 мин', description: 'Increases movement speed.' }
+                    ],
+                    mid: [
+                        { name: 'Glimmer Cape', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/glimmer_cape.png', timing: '9 мин', description: 'Provides magic resistance and invisibility.' },
+                        { name: 'Force Staff', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/force_staff.png', timing: '21 мин', description: 'Grants mobility and repositioning.' },
+                        { name: 'Aether Lens', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/aether_lens.png', timing: '25 мин', description: 'Increases cast range and mana regeneration.' },
+                        { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/blink.png', timing: '25 мин', description: 'Enables instant repositioning.' }
+                    ],
+                    late: [
+                        { name: 'Lotus Orb', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/lotus_orb.png', timing: '29 мин', description: 'Provides armor, regeneration, and spell reflection.' },
+                        { name: 'Eternal Shroud', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/eternal_shroud.png', timing: '35 мин', description: 'Grants spell lifesteal.' },
+                        { name: 'Aghanim\'s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/ultimate_scepter.png', timing: '38 мин', description: 'Enhances Rubick\'s abilities.' }
+                    ]
+                }
+            },
+            {
+                name: 'Wraith King',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/skeleton_king.png',
+                counters: [
+                    { name: 'Underlord', ability: 'Pit of Malice', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/abyssal_underlord_pit_of_malice.png', reason: 'AoE-дамаг и редукция армора.' },
+                    { name: 'Necrophos', ability: 'Reaper\'s Scythe', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/necrophos_reapers_scythe.png', reason: 'Дамаг over time и редукция хила.' },
+                    { name: 'Phantom Lancer', ability: 'Spirit Lance', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/phantom_lancer_spirit_lance.png', reason: 'Иллюзии overwhelm.' }
+                ],
+                role: 'Carry',
+                builds: {
+                    starting: [
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Provides cheap stats.' },
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Bonus damage to creeps.' }
+                    ],
+                    early: [
+                        { name: 'Boots of Speed', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/boots.png', timing: '0-3 мин', description: 'Movement speed.' },
+                        { name: 'Magic Wand', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/magic_wand.png', timing: '1-6 мин', description: 'Burst heal/mana.' },
+                        { name: 'Phase Boots', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/phase_boots.png', timing: '6-9 мин', description: 'Speed and phase.' }
+                    ],
+                    mid: [
+                        { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/blink.png', timing: '17-22 мин', description: 'Initiation tool.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '21-27 мин', description: 'Spell immunity.' },
+                        { name: 'Aghanim\'s Shard', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/aghanims_shard.png', timing: '21-24 мин', description: 'Ability upgrade.' }
+                    ],
+                    late: [
+                        { name: 'Assault Cuirass', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/assault.png', timing: '29-36 мин', description: 'Armor and attack speed aura.' },
+                        { name: 'Overwhelming Blink', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/overwhelming_blink.png', timing: '32-46 мин', description: 'Damage on blink.' },
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '35 мин', description: 'Lifesteal and active heal.' }
+                    ]
+                }
+            },
+            {
+                name: 'Morphling',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/morphling.png',
+                counters: [
+                    { name: 'Doom', ability: 'Doom', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/doom_bringer_doom.png', reason: 'Выключает Morphling из боя.' },
+                    { name: 'Bane', ability: 'Nightmare', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/bane_nightmare.png', reason: 'Контроль и дамаг.' },
+                    { name: 'Axe', ability: 'Berserker\'s Call', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/axe_berserkers_call.png', reason: 'Танкинг и burst-дамаг.' }
+                ],
+                role: 'Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-7 мин', description: 'Attribute switch.' },
+                        { name: 'Morbid Mask', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/morbid_mask.png', timing: '8 мин', description: 'Lifesteal.' }
+                    ],
+                    mid: [
+                        { name: 'Manta Style', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/manta.png', timing: '16-21 мин', description: 'Illusions and dispel.' },
+                        { name: 'Hurricane Pike', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/hurricane_pike.png', timing: '22-26 мин', description: 'Range and force.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '31-34 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '35 мин', description: 'Damage and evasion.' },
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '39-40 мин', description: 'Lifesteal and heal.' },
+                        { name: 'Eye of Skadi', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/skadi.png', timing: '45 мин', description: 'Slows and stats.' }
+                    ]
+                }
+            },
+            {
+                name: 'Slark',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/slark.png',
+                counters: [
+                    { name: 'Leshrac', ability: 'Split Earth', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/leshrac_split_earth.png', reason: 'AoE-дамаг и контроль.' },
+                    { name: 'Grimstroke', ability: 'Phantom\'s Embrace', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/grimstroke_phantom_embrace.png', reason: 'Дизейблы и silence.' },
+                    { name: 'Disruptor', ability: 'Kinetic Field', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/disruptor_kinetic_field.png', reason: 'Crowd control.' }
+                ],
+                role: 'Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '4 мин', description: 'Stats and attack speed.' },
+                        { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/wraith_band.png', timing: '3 мин', description: 'Attributes and damage.' }
+                    ],
+                    mid: [
+                        { name: 'Diffusal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/diffusal_blade.png', timing: '6 мин', description: 'Mana burn and slow.' },
+                        { name: 'Echo Sabre', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/echo_sabre.png', timing: '23 мин', description: 'Double strike and mana regen.' }
+                    ],
+                    late: [
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '34 мин', description: 'Spell immunity.' },
+                        { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/abyssal_blade.png', timing: '34 мин', description: 'Stun and bash.' },
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '35 мин', description: 'Damage and evasion.' }
+                    ]
+                }
+            },
+            {
+                name: 'Medusa',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/medusa.png',
+                counters: [
+                    { name: 'Anti-Mage', ability: 'Mana Break', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/antimage_mana_break.png', reason: 'Мана берн и мобильность.' },
+                    { name: 'Dark Seer', ability: 'Ion Shell', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/dark_seer_ion_shell.png', reason: 'Wear down в боях.' },
+                    { name: 'Centaur Warrunner', ability: 'Stampede', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/centaur_stampede.png', reason: 'Высокий armor и burst.' }
+                ],
+                role: 'Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Regenerates health.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Provides attributes.' },
+                        { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/wraith_band.png', timing: '0-5 мин', description: 'Stats and damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '6 мин', description: 'Attribute-switching boots.' },
+                        { name: 'Maelstrom', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/maelstrom.png', timing: '10 мин', description: 'Farm and damage.' }
+                    ],
+                    mid: [
+                        { name: 'Manta Style', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/manta.png', timing: '23 мин', description: 'Illusions and dispel.' },
+                        { name: 'Hurricane Pike', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/hurricane_pike.png', timing: '15 мин', description: 'Mobility and damage.' }
+                    ],
+                    late: [
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '30 мин', description: 'Damage and evasion.' },
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '32 мин', description: 'Lifesteal and heal.' },
+                        { name: 'Eye of Skadi', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/skadi.png', timing: '39 мин', description: 'Slows and stats.' }
+                    ]
+                }
+            },
+            {
+                name: 'Ursa',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/ursa.png',
+                counters: [
+                    { name: 'Silencer', ability: 'Glaives of Wisdom', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/silencer_glaives_of_wisdom.png', reason: 'Снижает дамаг Ursa.' },
+                    { name: 'Shadow Demon', ability: 'Disruption', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/shadow_demon_disruption.png', reason: 'Дизейблит в тимфайтах.' },
+                    { name: 'Bane', ability: 'Brain Sap', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/bane_brain_sap.png', reason: 'Локдаун и дамаг.' }
+                ],
+                role: 'Safelane Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Phase Boots', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/phase_boots.png', timing: '5-10 мин', description: 'Mobility.' },
+                        { name: 'Magic Wand', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/magic_wand.png', timing: '5-10 мин', description: 'Burst heal/mana.' }
+                    ],
+                    mid: [
+                        { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/blink.png', timing: '15-20 мин', description: 'Initiation.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/abyssal_blade.png', timing: '30+ мин', description: 'Stun and bash.' },
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '30+ мин', description: 'Lifesteal and heal.' },
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '30+ мин', description: 'Damage and evasion.' }
+                    ]
+                }
+            },
+            {
+                name: 'Templar Assassin',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/templar_assassin.png',
+                counters: [
+                    { name: 'Outworld Destroyer', ability: 'Arcane Orb', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/outworld_destroyer_arcane_orb.png', reason: 'Магический бурст.' },
+                    { name: 'Lion', ability: 'Hex', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/lion_voodoo.png', reason: 'Дизейбл и бурст.' },
+                    { name: 'Skywrath Mage', ability: 'Ancient Seal', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/skywrath_mage_ancient_seal.png', reason: 'Маг дамаг и сайленс.' }
+                ],
+                role: 'Safelane Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats and attack speed.' },
+                        { name: 'Dragon Lance', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/dragon_lance.png', timing: '5-10 мин', description: 'Range and stats.' }
+                    ],
+                    mid: [
+                        { name: 'Desolator', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/desolator.png', timing: '15-20 мин', description: 'Armor reduction.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Daedalus', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/daedalus.png', timing: '30+ мин', description: 'Critical damage.' },
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '30+ мин', description: 'Damage and evasion.' },
+                        { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/abyssal_blade.png', timing: '30+ мин', description: 'Stun and bash.' }
+                    ]
+                }
+            },
+            {
+                name: 'Storm Spirit',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/storm_spirit.png',
+                counters: [
+                    { name: 'Anti-Mage', ability: 'Mana Break', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/antimage_mana_break.png', reason: 'Мана берн.' },
+                    { name: 'Silencer', ability: 'Global Silence', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/silencer_global_silence.png', reason: 'Сайленс прерывает касты.' },
+                    { name: 'Shadow Demon', ability: 'Disruption', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/shadow_demon_disruption.png', reason: 'Дизейбл снижает импакт.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/clarity.png', timing: '0-5 мин', description: 'Mana regeneration.' },
+                        { name: 'Null Talisman', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/null_talisman.png', timing: '0-5 мин', description: 'Intelligence stats.' }
+                    ],
+                    early: [
+                        { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bottle.png', timing: '5-10 мин', description: 'Regen and runes.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Kaya', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/kaya.png', timing: '15-20 мин', description: 'Spell amp and mana regen.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Bloodthorn', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bloodthorn.png', timing: '30+ мин', description: 'Silence and crit.' },
+                        { name: 'Shiva\'s Guard', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/shivas_guard.png', timing: '30+ мин', description: 'Armor and slow.' },
+                        { name: 'Linken\'s Sphere', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/linkens_sphere.png', timing: '30+ мин', description: 'Spell block.' }
+                    ]
+                }
+            },
+            {
+                name: 'Invoker',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/invoker.png',
+                counters: [
+                    { name: 'Anti-Mage', ability: 'Mana Break', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/antimage_mana_break.png', reason: 'Мана берн.' },
+                    { name: 'Silencer', ability: 'Global Silence', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/silencer_global_silence.png', reason: 'Сайленс прерывает касты.' },
+                    { name: 'Shadow Demon', ability: 'Disruption', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/shadow_demon_disruption.png', reason: 'Дизейбл.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/clarity.png', timing: '0-5 мин', description: 'Mana regeneration.' },
+                        { name: 'Null Talisman', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/null_talisman.png', timing: '0-5 мин', description: 'Intelligence stats.' }
+                    ],
+                    early: [
+                        { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bottle.png', timing: '5-10 мин', description: 'Regen and runes.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Aghanim\'s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/ultimate_scepter.png', timing: '15-20 мин', description: 'Spell upgrade.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Octarine Core', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/octarine_core.png', timing: '30+ мин', description: 'Cooldown reduction.' },
+                        { name: 'Shiva\'s Guard', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/shivas_guard.png', timing: '30+ мин', description: 'Armor and slow.' },
+                        { name: 'Linken\'s Sphere', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/linkens_sphere.png', timing: '30+ мин', description: 'Spell block.' }
+                    ]
+                }
+            },
+            {
+                name: 'Puck',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/puck.png',
+                counters: [
+                    { name: 'Outworld Destroyer', ability: 'Arcane Orb', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/outworld_destroyer_arcane_orb.png', reason: 'Магический бурст.' },
+                    { name: 'Lion', ability: 'Hex', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/lion_voodoo.png', reason: 'Дизейбл и бурст.' },
+                    { name: 'Skywrath Mage', ability: 'Ancient Seal', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/skywrath_mage_ancient_seal.png', reason: 'Маг дамаг и сайленс.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/clarity.png', timing: '0-5 мин', description: 'Mana regeneration.' },
+                        { name: 'Null Talisman', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/null_talisman.png', timing: '0-5 мин', description: 'Intelligence stats.' }
+                    ],
+                    early: [
+                        { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bottle.png', timing: '5-10 мин', description: 'Regen and runes.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Blink Dagger', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/blink.png', timing: '15-20 мин', description: 'Initiation and escape.' },
+                        { name: 'Aghanim\'s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/ultimate_scepter.png', timing: '20-25 мин', description: 'Spell upgrade.' }
+                    ],
+                    late: [
+                        { name: 'Shiva\'s Guard', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/shivas_guard.png', timing: '30+ мин', description: 'Armor and slow.' },
+                        { name: 'Octarine Core', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/octarine_core.png', timing: '30+ мин', description: 'Cooldown reduction.' },
+                        { name: 'Linken\'s Sphere', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/linkens_sphere.png', timing: '30+ мин', description: 'Spell block.' }
+                    ]
+                }
+            },
+            {
+                name: 'Lina',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/lina.png',
+                counters: [
+                    { name: 'Anti-Mage', ability: 'Mana Break', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/antimage_mana_break.png', reason: 'Мана берн снижает ману.' },
+                    { name: 'Pugna', ability: 'Nether Ward', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/pugna_nether_ward.png', reason: 'Вард снижает маг дамаг.' },
+                    { name: 'Silencer', ability: 'Global Silence', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/silencer_global_silence.png', reason: 'Сайленс прерывает касты.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Clarity', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/clarity.png', timing: '0-5 мин', description: 'Mana regeneration.' },
+                        { name: 'Null Talisman', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/null_talisman.png', timing: '0-5 мин', description: 'Intelligence stats.' }
+                    ],
+                    early: [
+                        { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bottle.png', timing: '5-10 мин', description: 'Regen and runes.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Aether Lens', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/aether_lens.png', timing: '15-20 мин', description: 'Cast range.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Aghanim\'s Scepter', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/ultimate_scepter.png', timing: '30+ мин', description: 'Spell upgrade.' },
+                        { name: 'Scythe of Vyse', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/sheepstick.png', timing: '30+ мин', description: 'Hex and control.' },
+                        { name: 'Shiva\'s Guard', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/shivas_guard.png', timing: '30+ мин', description: 'Armor and slow.' }
+                    ]
+                }
+            },
+            {
+                name: 'Shadow Fiend',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/shadow_fiend.png',
+                counters: [
+                    { name: 'Spirit Breaker', ability: 'Charge of Darkness', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/spirit_breaker_charge_of_darkness.png', reason: 'Ганк и контроль.' },
+                    { name: 'Lion', ability: 'Hex', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/lion_voodoo.png', reason: 'Дизейбл и бурст.' },
+                    { name: 'Skywrath Mage', ability: 'Ancient Seal', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/skywrath_mage_ancient_seal.png', reason: 'Маг дамаг и сайленс.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/wraith_band.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' }
+                    ],
+                    early: [
+                        { name: 'Bottle', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bottle.png', timing: '5-10 мин', description: 'Regen and runes.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '15-20 мин', description: 'Spell immunity.' },
+                        { name: 'Shadow Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/shadow_blade.png', timing: '20-25 мин', description: 'Invisibility.' }
+                    ],
+                    late: [
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '30+ мин', description: 'Lifesteal and heal.' },
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '30+ мин', description: 'Damage and evasion.' },
+                        { name: 'Daedalus', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/daedalus.png', timing: '30+ мин', description: 'Critical damage.' }
+                    ]
+                }
+            },
+            {
+                name: 'Gyrocopter',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/gyrocopter.png',
+                counters: [
+                    { name: 'Medusa', ability: 'Mana Shield', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/medusa_mana_shield.png', reason: 'Танк контрит AoE дамаг.' },
+                    { name: 'Omniknight', ability: 'Guardian Angel', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/omniknight_guardian_angel.png', reason: 'Иммунитет к физ дамагу.' },
+                    { name: 'Abaddon', ability: 'Aphotic Shield', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/abaddon_aphotic_shield.png', reason: 'Шилд и хил.' }
+                ],
+                role: 'Safelane Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats and attack speed.' },
+                        { name: 'Maelstrom', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/maelstrom.png', timing: '5-10 мин', description: 'Farm and damage.' }
+                    ],
+                    mid: [
+                        { name: 'Manta Style', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/manta.png', timing: '15-20 мин', description: 'Illusions and dispel.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Mjollnir', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/mjollnir.png', timing: '30+ мин', description: 'Farm and damage.' },
+                        { name: 'Satanic', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/satanic.png', timing: '30+ мин', description: 'Lifesteal and heal.' },
+                        { name: 'Butterfly', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/butterfly.png', timing: '30+ мин', description: 'Damage and evasion.' }
+                    ]
+                }
+            },
+            {
+                name: 'Arc Warden',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/arc_warden.png',
+                counters: [
+                    { name: 'Meepo', ability: 'Poof', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/meepo_poof.png', reason: 'Множество клонов.' },
+                    { name: 'Phantom Lancer', ability: 'Spirit Lance', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/phantom_lancer_spirit_lance.png', reason: 'Иллюзии путают.' },
+                    { name: 'Chaos Knight', ability: 'Chaos Bolt', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/chaos_knight_chaos_bolt.png', reason: 'Иллюзии и бурст.' }
+                ],
+                role: 'Midlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Wraith Band', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/wraith_band.png', timing: '0-5 мин', description: 'Stats.' }
+                    ],
+                    early: [
+                        { name: 'Hand of Midas', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/hand_of_midas.png', timing: '5-10 мин', description: 'Farm.' },
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats.' }
+                    ],
+                    mid: [
+                        { name: 'Maelstrom', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/maelstrom.png', timing: '15-20 мин', description: 'Farm and damage.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Mjollnir', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/mjollnir.png', timing: '30+ мин', description: 'Farm and damage.' },
+                        { name: 'Scythe of Vyse', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/sheepstick.png', timing: '30+ мин', description: 'Hex and control.' },
+                        { name: 'Bloodthorn', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bloodthorn.png', timing: '30+ мин', description: 'Silence and crit.' }
+                    ]
+                }
+            },
+            {
+                name: 'Broodmother',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/broodmother.png',
+                counters: [
+                    { name: 'Earthshaker', ability: 'Echo Slam', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/earthshaker_echo_slam.png', reason: 'AoE бурст на пауков.' },
+                    { name: 'Legion Commander', ability: 'Duel', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/legion_commander_duel.png', reason: 'Дуэль и дамаг.' },
+                    { name: 'Axe', ability: 'Berserker\'s Call', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/axe_berserkers_call.png', reason: 'Контроль и дамаг.' }
+                ],
+                role: 'Offlane',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Soul Ring', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/soul_ring.png', timing: '5-10 мин', description: 'Mana regeneration.' },
+                        { name: 'Phase Boots', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/phase_boots.png', timing: '5-10 мин', description: 'Mobility.' }
+                    ],
+                    mid: [
+                        { name: 'Orchid Malevolence', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/orchid.png', timing: '15-20 мин', description: 'Silence and damage.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Bloodthorn', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bloodthorn.png', timing: '30+ мин', description: 'Silence and crit.' },
+                        { name: 'Assault Cuirass', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/assault.png', timing: '30+ мин', description: 'Armor and aura.' },
+                        { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/abyssal_blade.png', timing: '30+ мин', description: 'Stun and bash.' }
+                    ]
+                }
+            },
+            {
+                name: 'Phantom Assassin',
+                icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/heroes/phantom_assassin.png',
+                counters: [
+                    { name: 'Razor', ability: 'Static Link', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/razor_static_link.png', reason: 'Кража дамага.' },
+                    { name: 'Omniknight', ability: 'Guardian Angel', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/omniknight_guardian_angel.png', reason: 'Иммунитет к физ дамагу.' },
+                    { name: 'Slardar', ability: 'Corrosive Haze', abilityIcon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/abilities/slardar_corrosive_haze.png', reason: 'Редукция армора.' }
+                ],
+                role: 'Safelane Carry',
+                builds: {
+                    starting: [
+                        { name: 'Tango', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/tango.png', timing: '0-5 мин', description: 'Health regeneration.' },
+                        { name: 'Iron Branch', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/branches.png', timing: '0-5 мин', description: 'Stats.' },
+                        { name: 'Quelling Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/quelling_blade.png', timing: '0-5 мин', description: 'Creep damage.' }
+                    ],
+                    early: [
+                        { name: 'Power Treads', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/power_treads.png', timing: '5-10 мин', description: 'Stats and attack speed.' },
+                        { name: 'Battle Fury', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/bfury.png', timing: '5-10 мин', description: 'Farm and cleave.' }
+                    ],
+                    mid: [
+                        { name: 'Desolator', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/desolator.png', timing: '15-20 мин', description: 'Armor reduction.' },
+                        { name: 'Black King Bar', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/black_king_bar.png', timing: '20-25 мин', description: 'Spell immunity.' }
+                    ],
+                    late: [
+                        { name: 'Abyssal Blade', icon: 'https://cdn.dota2.com/apps/dota2/images/dota_react/items/abyssal_blade.png', timing: '30+ мин', description: 'Stun and bash.' },
+                        { name: 'Satanic', icon: 'https
