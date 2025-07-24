@@ -15,6 +15,10 @@
             --tg-theme-accent-color: #ff4500;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -28,6 +32,8 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom, 0px); /* Учет нижней панели на iOS */
         }
 
         .tab-content {
@@ -286,17 +292,81 @@
             background: darken(var(--tg-theme-button-color), 10%);
             transform: translateY(-2px);
         }
+
+        .subscription-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .subscription-content {
+            background: var(--tg-theme-bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%;
+            text-align: center;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .subscription-button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .subscription-button:hover {
+            background: darken(var(--tg-theme-button-color), 10%);
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div id="counter-picks" class="tab-content" style="display: block;">
+            <select id="role-filter-counter" class="role-filter">
+                <option value="">Все роли</option>
+                <option value="Support">Support</option>
+                <option value="Carry">Carry</option>
+                <option value="Midlane">Midlane</option>
+            </select>
             <input type="text" id="hero-search" class="search-bar" placeholder="Поиск героя...">
             <div class="hero-list" id="counter-hero-list">
                 <!-- Hero items for counter picks will be injected here -->
             </div>
         </div>
         <div id="builds" class="tab-content" style="display: none;">
+            <select id="role-filter-build" class="role-filter">
+                <option value="">Все роли</option>
+                <option value="Support">Support</option>
+                <option value="Carry">Carry</option>
+                <option value="Midlane">Midlane</option>
+            </select>
             <input type="text" id="build-search" class="search-bar" placeholder="Поиск героя...">
             <div class="hero-list" id="build-hero-list">
                 <!-- Hero items for builds will be injected here -->
@@ -336,6 +406,15 @@
                 <!-- Content will be injected here -->
             </div>
         </div>
+        <div id="subscription-modal" class="subscription-modal">
+            <div class="subscription-content">
+                <h3>Подписка на Builds</h3>
+                <p>💳 Оплатите 99р для доступа, или введите код "123" ниже.</p>
+                <button class="subscription-button" id="pay-button">Оплатить 99р</button>
+                <input type="text" id="code-input" class="code-input" placeholder="Ввести код">
+                <button class="subscription-button" id="code-button">Ввести код</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -361,6 +440,12 @@
         // Tab switching for main tabs
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
+                if (button.dataset.tab === 'builds' && !localStorage.getItem('subscribed')) {
+                    document.getElementById('subscription-modal').style.display = 'flex';
+                    document.getElementById('subscription-modal').classList.add('active');
+                    return;
+                }
+
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.style.display = 'none';
                 });
@@ -369,6 +454,27 @@
                 document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
             });
+        });
+
+        // Subscription handling
+        document.getElementById('pay-button').addEventListener('click', () => {
+            // Симулируем оплату (замените на Telegram Payments API)
+            localStorage.setItem('subscribed', 'true');
+            document.getElementById('subscription-modal').style.display = 'none';
+            document.getElementById('builds').style.display = 'block';
+            alert('Подписка оплачена! Доступ открыт.');
+        });
+
+        document.getElementById('code-button').addEventListener('click', () => {
+            const code = document.getElementById('code-input').value;
+            if (code === '123') {
+                localStorage.setItem('subscribed', 'true');
+                document.getElementById('subscription-modal').style.display = 'none';
+                document.getElementById('builds').style.display = 'block';
+                alert('Код верный! Доступ открыт.');
+            } else {
+                alert('Неверный код. Попробуйте "123".');
+            }
         });
 
         // Data for Heroes, Counter Picks, and Builds
@@ -707,6 +813,7 @@
             heroItem.classList.add('hero-item');
             heroItem.dataset.heroIndex = index;
             heroItem.dataset.type = 'counter';
+            heroItem.dataset.role = hero.role;
             heroItem.innerHTML = `
                 <img src="${hero.icon}" alt="${hero.name}" class="hero-icon">
                 <span>${hero.name}</span>
@@ -721,6 +828,7 @@
             heroItem.classList.add('hero-item');
             heroItem.dataset.heroIndex = index;
             heroItem.dataset.type = 'build';
+            heroItem.dataset.role = hero.role;
             heroItem.innerHTML = `
                 <img src="${hero.icon}" alt="${hero.name}" class="hero-icon">
                 <span>${hero.name}</span>
@@ -732,10 +840,23 @@
         const modal = document.getElementById('modal-overlay');
         const modalContent = modal.querySelector('.modal-content');
 
-        // Close on overlay click
+        // Close modal with animation
+        function closeModal() {
+            modal.classList.add('closing');
+            setTimeout(() => {
+                modal.classList.remove('active', 'closing');
+            }, 300); // Длительность анимации
+        }
+
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.classList.remove('active');
+                closeModal();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('close-button')) {
+                closeModal();
             }
         });
 
@@ -749,7 +870,7 @@
                 let contentHTML = '';
                 if (type === 'counter') {
                     contentHTML = `
-                        <span class="close-button" onclick="document.getElementById('modal-overlay').classList.remove('active')">×</span>
+                        <span class="close-button">×</span>
                         <h3>Контр-пики для ${hero.name}</h3>
                         ${hero.counters.map(counter => `
                             <div class="counter-pick">
@@ -761,7 +882,7 @@
                     `;
                 } else if (type === 'build') {
                     contentHTML = `
-                        <span class="close-button" onclick="document.getElementById('modal-overlay').classList.remove('active')">×</span>
+                        <span class="close-button">×</span>
                         <h3>Сборка для ${hero.name} - ${hero.role}</h3>
                         <div class="build-stage">
                             <strong>Starting Items (0-5 мин)</strong>
@@ -795,25 +916,41 @@
             });
         });
 
-        // Search functionality for Counter Picks
+        // Search and role filter for Counter Picks
         const counterSearchInput = document.getElementById('hero-search');
-        counterSearchInput.addEventListener('input', () => {
+        const counterRoleFilter = document.getElementById('role-filter-counter');
+        function filterCounterHeroes() {
             const query = counterSearchInput.value.toLowerCase();
+            const role = counterRoleFilter.value;
             document.querySelectorAll('#counter-hero-list .hero-item').forEach(item => {
                 const name = item.querySelector('span').textContent.toLowerCase();
-                item.style.display = name.includes(query) ? 'flex' : 'none';
+                const heroRole = item.dataset.role;
+                const matchesSearch = name.includes(query);
+                const matchesRole = !role || heroRole === role;
+                item.style.display = matchesSearch && matchesRole ? 'flex' : 'none';
             });
-        });
+        }
 
-        // Search functionality for Builds
+        counterSearchInput.addEventListener('input', filterCounterHeroes);
+        counterRoleFilter.addEventListener('change', filterCounterHeroes);
+
+        // Search and role filter for Builds
         const buildSearchInput = document.getElementById('build-search');
-        buildSearchInput.addEventListener('input', () => {
+        const buildRoleFilter = document.getElementById('role-filter-build');
+        function filterBuildHeroes() {
             const query = buildSearchInput.value.toLowerCase();
+            const role = buildRoleFilter.value;
             document.querySelectorAll('#build-hero-list .hero-item').forEach(item => {
                 const name = item.querySelector('span').textContent.toLowerCase();
-                item.style.display = name.includes(query) ? 'flex' : 'none';
+                const heroRole = item.dataset.role;
+                const matchesSearch = name.includes(query);
+                const matchesRole = !role || heroRole === role;
+                item.style.display = matchesSearch && matchesRole ? 'flex' : 'none';
             });
-        });
+        }
+
+        buildSearchInput.addEventListener('input', filterBuildHeroes);
+        buildRoleFilter.addEventListener('change', filterBuildHeroes);
     </script>
 </body>
 </html>
