@@ -352,15 +352,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Subscription styles */
+        /* Обновленные стили для подписки */
         .subscription-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
@@ -368,77 +368,130 @@
         }
 
         .subscription-content {
-            background: var(--tg-theme-bg-color);
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 90%;
-            width: 100%;
-            max-width: 400px;
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 30px 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 340px;
             text-align: center;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
 
         .subscription-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: var(--tg-theme-button-color);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color);
+        }
+
+        .subscription-subtitle {
+            font-size: 0.9rem;
+            color: rgba(224, 224, 224, 0.7);
+            margin-bottom: 24px;
+            line-height: 1.4;
         }
 
         .subscription-options {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 20px;
         }
 
         .subscription-option {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-        }
-
-        .subscription-option:hover {
-            background: var(--tg-theme-button-color);
-            transform: translateY(-3px);
+            background: rgba(51, 144, 236, 0.1);
+            border: 1px solid rgba(51, 144, 236, 0.2);
+            padding: 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
 
         .subscription-option.selected {
-            background: var(--tg-theme-button-color);
-            border: 2px solid var(--tg-theme-accent-color);
+            background: rgba(51, 144, 236, 0.2);
+            border-color: var(--tg-theme-button-color);
+        }
+
+        .option-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--tg-theme-text-color);
+        }
+
+        .option-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--tg-theme-button-color);
+            margin-bottom: 4px;
+        }
+
+        .option-desc {
+            font-size: 0.8rem;
+            color: rgba(224, 224, 224, 0.7);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: rgba(224, 224, 224, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid rgba(224, 224, 224, 0.1);
+        }
+
+        .divider::before {
+            margin-right: 12px;
+        }
+
+        .divider::after {
+            margin-left: 12px;
         }
 
         .promo-code-input {
             width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            box-sizing: border-box;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background: rgba(51, 144, 236, 0.05);
+            border: 1px solid rgba(51, 144, 236, 0.1);
+            border-radius: 12px;
             color: var(--tg-theme-text-color);
+            font-size: 0.95rem;
+            transition: border 0.3s;
+        }
+
+        .promo-code-input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color);
         }
 
         .subscribe-button {
+            width: 100%;
+            padding: 14px;
             background: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
             border: none;
-            padding: 12px;
-            border-radius: 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.2s;
         }
 
         .subscribe-button:hover {
-            background: #2a7bc8;
+            background: rgba(51, 144, 236, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .subscribe-button.secondary {
+            background: transparent;
+            color: var(--tg-theme-button-color);
+            border: 1px solid var(--tg-theme-button-color);
+            margin-top: 12px;
         }
 
         .success-animation {
@@ -446,32 +499,33 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: successPulse 1.5s ease-in-out;
-        }
-
-        @keyframes successPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            padding: 20px 0;
         }
 
         .success-icon {
-            font-size: 60px;
+            font-size: 64px;
             color: #4CAF50;
             margin-bottom: 20px;
-            animation: checkmark 0.5s ease-in-out;
+            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
         }
 
         @keyframes checkmark {
             0% { transform: scale(0); opacity: 0; }
-            80% { transform: scale(1.2); }
+            80% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
 
         .success-message {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            color: #4CAF50;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color);
+        }
+
+        .success-submessage {
+            font-size: 0.9rem;
+            color: rgba(224, 224, 224, 0.7);
+            margin-bottom: 24px;
         }
     </style>
 </head>
@@ -556,26 +610,28 @@
     <div id="subscription-overlay" class="subscription-overlay" style="display: none;">
         <div class="subscription-content">
             <div id="subscription-form">
-                <h2 class="subscription-title">Доступ к Meta</h2>
-                <p>Для доступа к Meta-сборкам требуется подписка</p>
+                <h2 class="subscription-title">Доступ к Meta-сборкам</h2>
+                <p class="subscription-subtitle">Получите доступ к актуальным сборкам героев для текущего мета</p>
                 
                 <div class="subscription-options">
                     <div class="subscription-option selected" data-option="monthly">
-                        <h3>99₽ в месяц</h3>
-                        <p>Полный доступ к Meta-сборкам</p>
+                        <div class="option-title">Ежемесячная подписка</div>
+                        <div class="option-price">99₽</div>
+                        <div class="option-desc">Автопродление, отменить можно в любой момент</div>
                     </div>
                 </div>
                 
-                <p>Или введите промо-код:</p>
+                <div class="divider">или</div>
+                
                 <input type="text" id="promo-code" class="promo-code-input" placeholder="Введите промо-код">
-                <button id="check-promo-code" class="subscribe-button">Проверить код</button>
+                <button id="check-promo-code" class="subscribe-button secondary">Активировать код</button>
                 <button id="subscribe-button" class="subscribe-button">Оформить подписку</button>
             </div>
             
             <div id="success-message" class="success-animation" style="display: none;">
                 <div class="success-icon">✓</div>
-                <h3 class="success-message">Успешно!</h3>
-                <p>Теперь у вас есть доступ к Meta-сборкам</p>
+                <h3 class="success-message">Доступ открыт!</h3>
+                <p class="success-submessage">Теперь вы можете просматривать все Meta-сборки</p>
             </div>
         </div>
     </div>
