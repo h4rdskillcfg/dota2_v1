@@ -351,6 +351,128 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        /* Subscription styles */
+        .subscription-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeInOverlay 0.3s ease-out;
+        }
+
+        .subscription-content {
+            background: var(--tg-theme-bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .subscription-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--tg-theme-button-color);
+        }
+
+        .subscription-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .subscription-option {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .subscription-option:hover {
+            background: var(--tg-theme-button-color);
+            transform: translateY(-3px);
+        }
+
+        .subscription-option.selected {
+            background: var(--tg-theme-button-color);
+            border: 2px solid var(--tg-theme-accent-color);
+        }
+
+        .promo-code-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            border: 1px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+        }
+
+        .subscribe-button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .subscribe-button:hover {
+            background: #2a7bc8;
+        }
+
+        .success-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: successPulse 1.5s ease-in-out;
+        }
+
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            animation: checkmark 0.5s ease-in-out;
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-message {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -430,6 +552,34 @@
         </div>
     </div>
 
+    <!-- Subscription Overlay -->
+    <div id="subscription-overlay" class="subscription-overlay" style="display: none;">
+        <div class="subscription-content">
+            <div id="subscription-form">
+                <h2 class="subscription-title">Доступ к Meta</h2>
+                <p>Для доступа к Meta-сборкам требуется подписка</p>
+                
+                <div class="subscription-options">
+                    <div class="subscription-option selected" data-option="monthly">
+                        <h3>99₽ в месяц</h3>
+                        <p>Полный доступ к Meta-сборкам</p>
+                    </div>
+                </div>
+                
+                <p>Или введите промо-код:</p>
+                <input type="text" id="promo-code" class="promo-code-input" placeholder="Введите промо-код">
+                <button id="check-promo-code" class="subscribe-button">Проверить код</button>
+                <button id="subscribe-button" class="subscribe-button">Оформить подписку</button>
+            </div>
+            
+            <div id="success-message" class="success-animation" style="display: none;">
+                <div class="success-icon">✓</div>
+                <h3 class="success-message">Успешно!</h3>
+                <p>Теперь у вас есть доступ к Meta-сборкам</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -453,10 +603,23 @@
         // Tab switching for main tabs
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                
+                if (tabId === 'builds') {
+                    // Check if user has access to Meta
+                    const hasAccess = localStorage.getItem('metaAccess') === 'true';
+                    
+                    if (!hasAccess) {
+                        // Show subscription overlay
+                        document.getElementById('subscription-overlay').style.display = 'flex';
+                        return;
+                    }
+                }
+                
                 document.querySelectorAll('.tab-content').forEach(content => {
                     content.style.display = 'none';
                 });
-                document.getElementById(button.dataset.tab).style.display = 'block';
+                document.getElementById(tabId).style.display = 'block';
 
                 document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
@@ -906,8 +1069,69 @@
                 item.style.display = name.includes(query) ? 'flex' : 'none';
             });
         });
+
+        // Subscription functionality
+        const subscriptionOverlay = document.getElementById('subscription-overlay');
+        const subscriptionForm = document.getElementById('subscription-form');
+        const successMessage = document.getElementById('success-message');
+        const promoCodeInput = document.getElementById('promo-code');
+        const checkPromoCodeBtn = document.getElementById('check-promo-code');
+        const subscribeBtn = document.getElementById('subscribe-button');
+
+        // Check promo code
+        checkPromoCodeBtn.addEventListener('click', () => {
+            const promoCode = promoCodeInput.value.trim();
+            
+            if (promoCode === '123') {
+                // Show success animation
+                subscriptionForm.style.display = 'none';
+                successMessage.style.display = 'flex';
+                
+                // Grant access
+                localStorage.setItem('metaAccess', 'true');
+                
+                // Hide overlay after 2 seconds and switch to Meta tab
+                setTimeout(() => {
+                    subscriptionOverlay.style.display = 'none';
+                    
+                    // Switch to Meta tab
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById('builds').style.display = 'block';
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
+                }, 2000);
+            } else {
+                alert('Неверный промо-код. Попробуйте снова.');
+            }
+        });
+
+        // Subscribe button (simulated)
+        subscribeBtn.addEventListener('click', () => {
+            // In a real app, this would initiate a payment process
+            // For demo, we'll just show success message
+            subscriptionForm.style.display = 'none';
+            successMessage.style.display = 'flex';
+            
+            // Grant access
+            localStorage.setItem('metaAccess', 'true');
+            
+            // Hide overlay after 2 seconds and switch to Meta tab
+            setTimeout(() => {
+                subscriptionOverlay.style.display = 'none';
+                
+                // Switch to Meta tab
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById('builds').style.display = 'block';
+                
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
+            }, 2000);
+        });
     </script>
-</body>
-</html>
 </body>
 </html>
