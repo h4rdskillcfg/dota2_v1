@@ -218,18 +218,52 @@
             align-items: center;
         }
 
-        .avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--tg-theme-button-color);
-            animation: glow 2.5s infinite alternate ease-in-out;
+        /* Анимированная аватарка */
+        .avatar-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
             margin-bottom: 20px;
         }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 5px rgba(51, 144, 236, 0.3); }
-            to { box-shadow: 0 0 20px rgba(51, 144, 236, 0.8); }
+        
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid var(--tg-theme-button-color);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .avatar-container::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            background-size: 400% 400%;
+            z-index: 1;
+            animation: gradient-pulse 3s ease infinite;
+            filter: blur(10px);
+            opacity: 0.7;
+        }
+        
+        @keyframes gradient-pulse {
+            0% {
+                background-position: 0% 50%;
+                transform: scale(0.95);
+            }
+            50% {
+                background-position: 100% 50%;
+                transform: scale(1.05);
+            }
+            100% {
+                background-position: 0% 50%;
+                transform: scale(0.95);
+            }
         }
 
         .profile-header {
@@ -261,25 +295,6 @@
             transform: translateY(-2px);
         }
 
-        .profile-achievements {
-            width: 100%;
-            margin-bottom: 20px;
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .achievement-item {
-            padding: 10px 0;
-            text-align: center;
-            border-bottom: 1px solid var(--tg-theme-bg-color);
-        }
-
-        .achievement-item:last-child {
-            border-bottom: none;
-        }
-
         .profile-settings {
             width: 100%;
             display: flex;
@@ -298,7 +313,7 @@
         }
 
         .settings-button:hover {
-            background: darken(var(--tg-theme-button-color), 10%);
+            background: #2a7bc8;
             transform: translateY(-2px);
         }
 
@@ -325,7 +340,7 @@
         }
 
         .steam-fetch-button:hover {
-            background: darken(var(--tg-theme-button-color), 10%);
+            background: #2a7bc8;
         }
 
         .profile-stats-dynamic {
@@ -352,6 +367,7 @@
                 <!-- Hero items for counter picks will be injected here -->
             </div>
         </div>
+        <!-- Вкладка переименована в Meta -->
         <div id="builds" class="tab-content" style="display: none;">
             <select id="role-filter-build" class="role-filter">
                 <option value="">Все роли</option>
@@ -366,7 +382,10 @@
         </div>
         <div id="profile" class="tab-content" style="display: none;">
             <div class="profile-section">
-                <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
+                <!-- Анимированная аватарка -->
+                <div class="avatar-container">
+                    <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
+                </div>
                 <div class="profile-header">
                     <h2>Ваш Профиль</h2>
                 </div>
@@ -381,38 +400,7 @@
                         <strong>Любимый герой:</strong> Rubick
                     </div>
                 </div>
-                <div class="profile-achievements">
-                    <div class="achievement-item">
-                        <strong>Достижение 1:</strong> 1000 матчей сыграно
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 2:</strong> Top 100 MMR
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 3:</strong> 500 kills на Rubick
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 4:</strong> Победная серия 10 игр
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 5:</strong> Мастер контр-пиков
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 6:</strong> Эксперт сборок
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 7:</strong> 100 друзей в Dota
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 8:</strong> Персонализированный профиль
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 9:</strong> Уровень 50
-                    </div>
-                    <div class="achievement-item">
-                        <strong>Достижение 10:</strong> Легендарный игрок
-                    </div>
-                </div>
+                <!-- Блок достижений удален -->
                 <div class="profile-settings">
                     <button class="settings-button">Изменить аватар</button>
                     <button class="settings-button">Настройки уведомлений</button>
@@ -431,7 +419,8 @@
         </div>
         <div class="tab-bar">
             <button class="tab-button active" data-tab="counter-picks">Counter Picks</button>
-            <button class="tab-button" data-tab="builds">Builds</button>
+            <!-- Вкладка переименована в Meta -->
+            <button class="tab-button" data-tab="builds">Meta</button>
             <button class="tab-button" data-tab="profile">Profile</button>
         </div>
         <div id="modal-overlay" class="modal-overlay">
@@ -918,5 +907,7 @@
             });
         });
     </script>
+</body>
+</html>
 </body>
 </html>
