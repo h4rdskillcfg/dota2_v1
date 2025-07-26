@@ -489,18 +489,10 @@
             opacity: 0.9;
         }
 
-        /* Nickname Section Styles */
-        .nickname-section {
+        /* Simple Nickname Display */
+        .nickname-display-simple {
             margin: 15px 0 20px 0;
             text-align: center;
-        }
-
-        .nickname-display {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
         }
 
         .nickname-text {
@@ -508,110 +500,6 @@
             font-weight: bold;
             color: var(--tg-theme-text-color);
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .nickname-text:hover {
-            color: var(--tg-theme-button-color);
-            transform: scale(1.05);
-        }
-
-        .edit-nickname-btn {
-            background: none;
-            border: none;
-            font-size: 1.2em;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            opacity: 0.7;
-        }
-
-        .edit-nickname-btn:hover {
-            background: var(--tg-theme-button-color);
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .nickname-edit {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            animation: fadeInDown 0.3s ease-out;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .nickname-input {
-            width: 200px;
-            max-width: 100%;
-            padding: 10px 15px;
-            border: 2px solid var(--tg-theme-button-color);
-            border-radius: 25px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-size: 1.1em;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .nickname-input:focus {
-            border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            transform: scale(1.05);
-        }
-
-        .nickname-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .save-nickname-btn,
-        .cancel-nickname-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 50%;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .save-nickname-btn {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .save-nickname-btn:hover {
-            background: linear-gradient(45deg, #45a049, #3e8e41);
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .cancel-nickname-btn {
-            background: linear-gradient(45deg, #f44336, #d32f2f);
-            color: white;
-        }
-
-        .cancel-nickname-btn:hover {
-            background: linear-gradient(45deg, #d32f2f, #c62828);
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
         }
 
         .nickname-saved-animation {
@@ -632,6 +520,116 @@
                 transform: scale(1);
                 color: var(--tg-theme-text-color);
             }
+        }
+
+        /* Nickname Modal Styles */
+        .nickname-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .nickname-modal-content {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: 300px;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.7) translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .nickname-modal h3 {
+            margin: 0 0 20px 0;
+            color: var(--tg-theme-text-color);
+            font-size: 1.3em;
+        }
+
+        .nickname-modal-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--tg-theme-button-color);
+            border-radius: 12px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 1.1em;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .nickname-modal-input:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .nickname-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .nickname-modal-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .nickname-save-btn {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+
+        .nickname-save-btn:hover {
+            background: #2a7bc8;
+            transform: translateY(-2px);
+        }
+
+        .nickname-cancel-btn {
+            background: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            border: 1px solid var(--tg-theme-button-color);
+        }
+
+        .nickname-cancel-btn:hover {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            transform: translateY(-2px);
         }
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -848,19 +846,9 @@
                     <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
                 </div>
                 
-                <!-- Nickname Section -->
-                <div class="nickname-section">
-                    <div class="nickname-display" id="nickname-display">
-                        <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
-                        <button class="edit-nickname-btn" id="edit-nickname-btn">✏️</button>
-                    </div>
-                    <div class="nickname-edit" id="nickname-edit" style="display: none;">
-                        <input type="text" class="nickname-input" id="nickname-input" maxlength="20" placeholder="Введите новый ник">
-                        <div class="nickname-buttons">
-                            <button class="save-nickname-btn" id="save-nickname-btn">✓</button>
-                            <button class="cancel-nickname-btn" id="cancel-nickname-btn">✕</button>
-                        </div>
-                    </div>
+                <!-- Nickname Display -->
+                <div class="nickname-display-simple">
+                    <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
                 </div>
                 
                 <div class="profile-header">
@@ -922,6 +910,7 @@
                     <button class="settings-button">Изменить аватар</button>
                     <button class="settings-button">Настройки уведомлений</button>
                     <button class="settings-button">Поделиться профилем</button>
+                    <button class="settings-button" id="change-nickname-btn">Изменить ник</button>
                 </div>
             </div>
         </div>
@@ -1791,110 +1780,99 @@
             }
 
             setupNicknameListeners() {
-                const editBtn = document.getElementById('edit-nickname-btn');
-                const saveBtn = document.getElementById('save-nickname-btn');
-                const cancelBtn = document.getElementById('cancel-nickname-btn');
-                const nicknameInput = document.getElementById('nickname-input');
-                const nicknameText = document.getElementById('nickname-text');
+                const changeNicknameBtn = document.getElementById('change-nickname-btn');
+                
+                if (!changeNicknameBtn) return;
 
-                if (!editBtn || !saveBtn || !cancelBtn || !nicknameInput || !nicknameText) return;
-
-                // Открытие редактирования по клику на кнопку редактирования
-                editBtn.addEventListener('click', () => {
-                    this.startNicknameEdit();
-                });
-
-                // Открытие редактирования по клику на сам никнейм
-                nicknameText.addEventListener('click', () => {
-                    this.startNicknameEdit();
-                });
-
-                // Сохранение никнейма
-                saveBtn.addEventListener('click', () => {
-                    this.saveNickname();
-                });
-
-                // Отмена редактирования
-                cancelBtn.addEventListener('click', () => {
-                    this.cancelNicknameEdit();
-                });
-
-                // Сохранение по Enter
-                nicknameInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        this.saveNickname();
-                    } else if (e.key === 'Escape') {
-                        this.cancelNicknameEdit();
-                    }
+                // Открытие модального окна для изменения ника
+                changeNicknameBtn.addEventListener('click', () => {
+                    this.openNicknameModal();
                 });
             }
 
-            startNicknameEdit() {
-                const nicknameDisplay = document.getElementById('nickname-display');
-                const nicknameEdit = document.getElementById('nickname-edit');
-                const nicknameInput = document.getElementById('nickname-input');
-                const nicknameText = document.getElementById('nickname-text');
-
-                if (!nicknameDisplay || !nicknameEdit || !nicknameInput || !nicknameText) return;
-
-                nicknameInput.value = nicknameText.textContent;
-                nicknameDisplay.style.display = 'none';
-                nicknameEdit.style.display = 'flex';
+            openNicknameModal() {
+                const currentNickname = document.getElementById('nickname-text').textContent;
+                
+                // Создаем модальное окно
+                const modal = document.createElement('div');
+                modal.className = 'nickname-modal';
+                modal.innerHTML = `
+                    <div class="nickname-modal-content">
+                        <h3>Изменить никнейм</h3>
+                        <input type="text" class="nickname-modal-input" id="modal-nickname-input" maxlength="20" placeholder="Введите новый ник" value="${currentNickname}">
+                        <div class="nickname-modal-buttons">
+                            <button class="nickname-modal-btn nickname-save-btn" id="modal-save-btn">Сохранить</button>
+                            <button class="nickname-modal-btn nickname-cancel-btn" id="modal-cancel-btn">Отмена</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
                 
                 // Фокус на поле ввода
+                const input = modal.querySelector('#modal-nickname-input');
                 setTimeout(() => {
-                    nicknameInput.focus();
-                    nicknameInput.select();
+                    input.focus();
+                    input.select();
                 }, 100);
-            }
-
-            saveNickname() {
-                const nicknameInput = document.getElementById('nickname-input');
-                const nicknameText = document.getElementById('nickname-text');
-                const nicknameDisplay = document.getElementById('nickname-display');
-                const nicknameEdit = document.getElementById('nickname-edit');
-
-                if (!nicknameInput || !nicknameText || !nicknameDisplay || !nicknameEdit) return;
-
-                const newNickname = nicknameInput.value.trim();
                 
-                // Валидация
-                if (newNickname.length === 0) {
-                    this.showNicknameError('Никнейм не может быть пустым!');
-                    return;
-                }
+                // Обработчики событий
+                const saveBtn = modal.querySelector('#modal-save-btn');
+                const cancelBtn = modal.querySelector('#modal-cancel-btn');
                 
-                if (newNickname.length > 20) {
-                    this.showNicknameError('Никнейм слишком длинный!');
-                    return;
-                }
-
-                // Сохраняем никнейм
-                nicknameText.textContent = newNickname;
-                localStorage.setItem('userNickname', newNickname);
-
-                // Показываем анимацию сохранения
-                nicknameText.classList.add('nickname-saved-animation');
-                setTimeout(() => {
-                    nicknameText.classList.remove('nickname-saved-animation');
-                }, 1000);
-
-                // Возвращаемся к отображению
-                nicknameEdit.style.display = 'none';
-                nicknameDisplay.style.display = 'flex';
-
-                // Показываем уведомление об успешном сохранении
-                this.showNicknameSaved();
-            }
-
-            cancelNicknameEdit() {
-                const nicknameDisplay = document.getElementById('nickname-display');
-                const nicknameEdit = document.getElementById('nickname-edit');
-
-                if (!nicknameDisplay || !nicknameEdit) return;
-
-                nicknameEdit.style.display = 'none';
-                nicknameDisplay.style.display = 'flex';
+                const closeModal = () => {
+                    document.body.removeChild(modal);
+                };
+                
+                const saveNickname = () => {
+                    const newNickname = input.value.trim();
+                    
+                    // Валидация
+                    if (newNickname.length === 0) {
+                        this.showNicknameError('Никнейм не может быть пустым!');
+                        return;
+                    }
+                    
+                    if (newNickname.length > 20) {
+                        this.showNicknameError('Никнейм слишком длинный!');
+                        return;
+                    }
+                    
+                    // Сохраняем никнейм
+                    const nicknameText = document.getElementById('nickname-text');
+                    nicknameText.textContent = newNickname;
+                    localStorage.setItem('userNickname', newNickname);
+                    
+                    // Показываем анимацию сохранения
+                    nicknameText.classList.add('nickname-saved-animation');
+                    setTimeout(() => {
+                        nicknameText.classList.remove('nickname-saved-animation');
+                    }, 1000);
+                    
+                    // Показываем уведомление об успешном сохранении
+                    this.showNicknameSaved();
+                    
+                    closeModal();
+                };
+                
+                saveBtn.addEventListener('click', saveNickname);
+                cancelBtn.addEventListener('click', closeModal);
+                
+                // Закрытие по клику вне модального окна
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                // Обработка клавиш
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        saveNickname();
+                    } else if (e.key === 'Escape') {
+                        closeModal();
+                    }
+                });
             }
 
             showNicknameError(message) {
