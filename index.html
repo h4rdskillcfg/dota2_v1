@@ -317,31 +317,7 @@
             transform: translateY(-2px);
         }
 
-        .steam-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-        }
 
-        .steam-fetch-button {
-            background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.3s;
-        }
-
-        .steam-fetch-button:hover {
-            background: #2a7bc8;
-        }
 
         .profile-stats-dynamic {
             width: 100%;
@@ -785,15 +761,6 @@
                     <button class="settings-button">Изменить аватар</button>
                     <button class="settings-button">Настройки уведомлений</button>
                     <button class="settings-button">Поделиться профилем</button>
-                </div>
-                <div class="steam-integration">
-                    <h3>Интеграция со Steam API</h3>
-                    <input type="text" id="steam-api-key" class="steam-input" placeholder="Введите Steam API Key">
-                    <input type="text" id="steam-id" class="steam-input" placeholder="Введите ваш Steam ID">
-                    <button id="fetch-steam-stats" class="steam-fetch-button">Получить статистику</button>
-                    <div id="steam-stats" class="profile-stats-dynamic">
-                        <!-- Steam stats will be injected here -->
-                    </div>
                 </div>
             </div>
         </div>
