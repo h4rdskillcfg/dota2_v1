@@ -324,26 +324,28 @@
             float: right;
             cursor: pointer;
             font-size: 24px;
-            color: var(--tg-theme-text-color);
+            color: var(--text-primary);
             transition: color 0.3s;
         }
 
         .close-button:hover {
-            color: var(--tg-theme-accent-color);
+            color: var(--accent-primary);
         }
 
         .counter-pick, .build-stage {
             margin-bottom: 15px;
-            background: var(--tg-theme-secondary-bg-color);
+            background: var(--glass-bg);
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px var(--shadow-light);
+            border: 1px solid var(--separator);
         }
 
         .counter-pick strong, .build-stage strong {
             display: block;
             margin-bottom: 5px;
             font-size: 1.1em;
+            color: var(--text-primary);
         }
 
         .ability-icon, .item-icon {
@@ -356,7 +358,7 @@
         .counter-reason, .item-description {
             font-size: 0.95em;
             line-height: 1.5;
-            color: var(--tg-theme-text-color);
+            color: var(--text-secondary);
         }
 
         .profile-section {
