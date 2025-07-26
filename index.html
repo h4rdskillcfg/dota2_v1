@@ -70,19 +70,31 @@
 
         .search-bar {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
+            max-width: 400px;
+            margin: 0 auto 20px auto;
+            padding: 15px 20px;
             box-sizing: border-box;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
+            border: 2px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 25px;
             background: var(--tg-theme-bg-color);
             color: var(--tg-theme-text-color);
-            transition: border-color 0.3s;
+            font-size: 1em;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: block;
         }
 
         .search-bar:focus {
             border-color: var(--tg-theme-button-color);
             outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(51, 144, 236, 0.2);
+        }
+
+        .search-bar::placeholder {
+            color: rgba(224, 224, 224, 0.6);
+            font-style: italic;
         }
 
 
@@ -90,6 +102,73 @@
         .hero-list {
             display: flex;
             flex-direction: column;
+        }
+
+        /* Role Filter Styles for Meta Tab */
+        .role-filter-container {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .role-filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 15px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .role-btn {
+            padding: 10px 16px;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            min-width: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .role-btn:hover::before {
+            left: 100%;
+        }
+
+        .role-btn:hover {
+            border-color: var(--tg-theme-button-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(51, 144, 236, 0.3);
+        }
+
+        .role-btn.active {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border-color: var(--tg-theme-button-color);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(51, 144, 236, 0.4);
+        }
+
+        .role-btn.active:hover {
+            background: #2a7bc8;
+            border-color: #2a7bc8;
         }
 
         .hero-item {
@@ -839,12 +918,14 @@
         </div>
         <!-- Вкладка переименована в Meta -->
         <div id="builds" class="tab-content" style="display: none;">
-            <select id="role-filter-build" class="role-filter">
-                <option value="">Все роли</option>
-                <option value="Support">Support</option>
-                <option value="Carry">Carry</option>
-                <option value="Midlane">Midlane</option>
-            </select>
+            <div class="role-filter-container">
+                <div class="role-filter-buttons">
+                    <button class="role-btn active" data-role="">Все роли</button>
+                    <button class="role-btn" data-role="Support">Support</button>
+                    <button class="role-btn" data-role="Carry">Carry</button>
+                    <button class="role-btn" data-role="Midlane">Midlane</button>
+                </div>
+            </div>
             <input type="text" id="build-search" class="search-bar" placeholder="Поиск героя...">
             <div class="hero-list" id="build-hero-list">
                 <!-- Hero items for builds will be injected here -->
@@ -1460,9 +1541,37 @@
         const buildSearchInput = document.getElementById('build-search');
         buildSearchInput.addEventListener('input', () => {
             const query = buildSearchInput.value.toLowerCase();
+            const activeRole = document.querySelector('.role-btn.active').dataset.role;
+            
             document.querySelectorAll('#build-hero-list .hero-item').forEach(item => {
                 const name = item.querySelector('span').textContent.toLowerCase();
-                item.style.display = name.includes(query) ? 'flex' : 'none';
+                const heroData = heroes.find(hero => hero.name.toLowerCase() === name);
+                const roleMatch = !activeRole || (heroData && heroData.role === activeRole);
+                const nameMatch = name.includes(query);
+                
+                item.style.display = (nameMatch && roleMatch) ? 'flex' : 'none';
+            });
+        });
+
+        // Role filter functionality for Meta tab
+        document.querySelectorAll('.role-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active button
+                document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                const selectedRole = button.dataset.role;
+                const searchQuery = buildSearchInput.value.toLowerCase();
+                
+                // Filter heroes based on role and search query
+                document.querySelectorAll('#build-hero-list .hero-item').forEach(item => {
+                    const name = item.querySelector('span').textContent.toLowerCase();
+                    const heroData = heroes.find(hero => hero.name.toLowerCase() === name);
+                    const roleMatch = !selectedRole || (heroData && heroData.role === selectedRole);
+                    const nameMatch = !searchQuery || name.includes(searchQuery);
+                    
+                    item.style.display = (nameMatch && roleMatch) ? 'flex' : 'none';
+                });
             });
         });
 
