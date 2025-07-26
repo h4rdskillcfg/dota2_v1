@@ -560,7 +560,7 @@
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
             padding: 28px;
-            border-radius: 24px;
+            border-radius: 24px !important;
             box-shadow: 0 12px 40px var(--shadow-medium);
             border: 1px solid var(--separator);
             position: relative;
@@ -1097,6 +1097,22 @@
             font-size: 0.9rem;
             color: var(--text-secondary);
             margin-bottom: 24px;
+        }
+
+        .tab-bar {
+            min-height: 48px;
+            height: 48px;
+            padding: 4px 0 24px 0;
+            background: rgba(255,255,255,0.65) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            box-shadow: 0 -2px 16px 0 rgba(31,38,135,0.08);
+            border-top: 1px solid rgba(0,0,0,0.06);
+            bottom: 12px;
+            width: calc(100% - 24px);
+            left: 12px;
+            right: 12px;
+            border-radius: 18px;
         }
     </style>
 </head>
