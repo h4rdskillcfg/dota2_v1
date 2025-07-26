@@ -1469,8 +1469,12 @@
             setupEventListeners() {
                 // Симуляция получения XP при активности
                 document.addEventListener('click', (e) => {
+                    // Проверяем, что мы не во вкладке profile для settings-button
+                    const isProfileTab = document.getElementById('profile').style.display !== 'none';
+                    const isSettingsButton = e.target.classList.contains('settings-button');
+                    
                     if (e.target.classList.contains('hero-item') || 
-                        e.target.classList.contains('settings-button')) {
+                        (isSettingsButton && !isProfileTab)) {
                         this.gainXP(Math.floor(Math.random() * 50) + 10);
                     }
                 });
