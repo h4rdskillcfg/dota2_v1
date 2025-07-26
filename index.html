@@ -316,8 +316,8 @@
         }
 
         .modal-overlay.active .modal-content {
-            transform: scale(1) translateY(0);
             opacity: 1;
+            transform: scale(1) translateY(0);
         }
 
         .close-button {
@@ -1113,6 +1113,20 @@
             left: 12px;
             right: 12px;
             border-radius: 18px;
+        }
+
+        .modal-overlay {
+            z-index: 2000 !important;
+        }
+        .modal-content {
+            opacity: 0;
+            transform: scale(0.96) translateY(40px);
+            transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            z-index: 2100 !important;
+        }
+        .modal-overlay.active .modal-content {
+            opacity: 1;
+            transform: scale(1) translateY(0);
         }
     </style>
 </head>
