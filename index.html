@@ -488,6 +488,151 @@
             font-size: 0.85em;
             opacity: 0.9;
         }
+
+        /* Nickname Section Styles */
+        .nickname-section {
+            margin: 15px 0 20px 0;
+            text-align: center;
+        }
+
+        .nickname-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .nickname-text {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--tg-theme-text-color);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nickname-text:hover {
+            color: var(--tg-theme-button-color);
+            transform: scale(1.05);
+        }
+
+        .edit-nickname-btn {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .edit-nickname-btn:hover {
+            background: var(--tg-theme-button-color);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .nickname-edit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInDown 0.3s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nickname-input {
+            width: 200px;
+            max-width: 100%;
+            padding: 10px 15px;
+            border: 2px solid var(--tg-theme-button-color);
+            border-radius: 25px;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            font-size: 1.1em;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .nickname-input:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .nickname-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-nickname-btn,
+        .cancel-nickname-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .save-nickname-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .save-nickname-btn:hover {
+            background: linear-gradient(45deg, #45a049, #3e8e41);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .cancel-nickname-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .cancel-nickname-btn:hover {
+            background: linear-gradient(45deg, #d32f2f, #c62828);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .nickname-saved-animation {
+            animation: nicknameSaved 1s ease-out;
+        }
+
+        @keyframes nicknameSaved {
+            0% {
+                transform: scale(1);
+                color: var(--tg-theme-text-color);
+            }
+            50% {
+                transform: scale(1.2);
+                color: #4CAF50;
+                text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+            }
+            100% {
+                transform: scale(1);
+                color: var(--tg-theme-text-color);
+            }
+        }
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -702,6 +847,22 @@
                 <div class="avatar-container">
                     <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
                 </div>
+                
+                <!-- Nickname Section -->
+                <div class="nickname-section">
+                    <div class="nickname-display" id="nickname-display">
+                        <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
+                        <button class="edit-nickname-btn" id="edit-nickname-btn">✏️</button>
+                    </div>
+                    <div class="nickname-edit" id="nickname-edit" style="display: none;">
+                        <input type="text" class="nickname-input" id="nickname-input" maxlength="20" placeholder="Введите новый ник">
+                        <div class="nickname-buttons">
+                            <button class="save-nickname-btn" id="save-nickname-btn">✓</button>
+                            <button class="cancel-nickname-btn" id="cancel-nickname-btn">✕</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="profile-header">
                     <h2>Ваш Профиль</h2>
                 </div>
@@ -1403,6 +1564,7 @@
             init() {
                 this.updateUI();
                 this.setupEventListeners();
+                this.setupNicknameListeners();
                 this.animateXPBar();
             }
 
@@ -1412,6 +1574,9 @@
                 
                 // Обновляем название уровня
                 document.querySelector('.level-title').textContent = this.getLevelTitle(this.currentLevel);
+                
+                // Обновляем никнейм
+                this.updateNickname();
                 
                 // Обновляем XP
                 const currentXPForLevel = this.calculateXPForLevel(this.currentLevel);
@@ -1614,6 +1779,204 @@
                 setTimeout(() => {
                     xpBar.style.width = currentWidth;
                 }, 100);
+            }
+
+            // Nickname Management Methods
+            updateNickname() {
+                const savedNickname = localStorage.getItem('userNickname') || 'Dota_Master_2024';
+                const nicknameText = document.getElementById('nickname-text');
+                if (nicknameText) {
+                    nicknameText.textContent = savedNickname;
+                }
+            }
+
+            setupNicknameListeners() {
+                const editBtn = document.getElementById('edit-nickname-btn');
+                const saveBtn = document.getElementById('save-nickname-btn');
+                const cancelBtn = document.getElementById('cancel-nickname-btn');
+                const nicknameInput = document.getElementById('nickname-input');
+                const nicknameText = document.getElementById('nickname-text');
+
+                if (!editBtn || !saveBtn || !cancelBtn || !nicknameInput || !nicknameText) return;
+
+                // Открытие редактирования по клику на кнопку редактирования
+                editBtn.addEventListener('click', () => {
+                    this.startNicknameEdit();
+                });
+
+                // Открытие редактирования по клику на сам никнейм
+                nicknameText.addEventListener('click', () => {
+                    this.startNicknameEdit();
+                });
+
+                // Сохранение никнейма
+                saveBtn.addEventListener('click', () => {
+                    this.saveNickname();
+                });
+
+                // Отмена редактирования
+                cancelBtn.addEventListener('click', () => {
+                    this.cancelNicknameEdit();
+                });
+
+                // Сохранение по Enter
+                nicknameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        this.saveNickname();
+                    } else if (e.key === 'Escape') {
+                        this.cancelNicknameEdit();
+                    }
+                });
+            }
+
+            startNicknameEdit() {
+                const nicknameDisplay = document.getElementById('nickname-display');
+                const nicknameEdit = document.getElementById('nickname-edit');
+                const nicknameInput = document.getElementById('nickname-input');
+                const nicknameText = document.getElementById('nickname-text');
+
+                if (!nicknameDisplay || !nicknameEdit || !nicknameInput || !nicknameText) return;
+
+                nicknameInput.value = nicknameText.textContent;
+                nicknameDisplay.style.display = 'none';
+                nicknameEdit.style.display = 'flex';
+                
+                // Фокус на поле ввода
+                setTimeout(() => {
+                    nicknameInput.focus();
+                    nicknameInput.select();
+                }, 100);
+            }
+
+            saveNickname() {
+                const nicknameInput = document.getElementById('nickname-input');
+                const nicknameText = document.getElementById('nickname-text');
+                const nicknameDisplay = document.getElementById('nickname-display');
+                const nicknameEdit = document.getElementById('nickname-edit');
+
+                if (!nicknameInput || !nicknameText || !nicknameDisplay || !nicknameEdit) return;
+
+                const newNickname = nicknameInput.value.trim();
+                
+                // Валидация
+                if (newNickname.length === 0) {
+                    this.showNicknameError('Никнейм не может быть пустым!');
+                    return;
+                }
+                
+                if (newNickname.length > 20) {
+                    this.showNicknameError('Никнейм слишком длинный!');
+                    return;
+                }
+
+                // Сохраняем никнейм
+                nicknameText.textContent = newNickname;
+                localStorage.setItem('userNickname', newNickname);
+
+                // Показываем анимацию сохранения
+                nicknameText.classList.add('nickname-saved-animation');
+                setTimeout(() => {
+                    nicknameText.classList.remove('nickname-saved-animation');
+                }, 1000);
+
+                // Возвращаемся к отображению
+                nicknameEdit.style.display = 'none';
+                nicknameDisplay.style.display = 'flex';
+
+                // Показываем уведомление об успешном сохранении
+                this.showNicknameSaved();
+            }
+
+            cancelNicknameEdit() {
+                const nicknameDisplay = document.getElementById('nickname-display');
+                const nicknameEdit = document.getElementById('nickname-edit');
+
+                if (!nicknameDisplay || !nicknameEdit) return;
+
+                nicknameEdit.style.display = 'none';
+                nicknameDisplay.style.display = 'flex';
+            }
+
+            showNicknameError(message) {
+                // Создаем элемент для показа ошибки
+                const errorElement = document.createElement('div');
+                errorElement.textContent = message;
+                errorElement.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(45deg, #f44336, #d32f2f);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+                    animation: errorShake 0.5s ease-out;
+                `;
+
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes errorShake {
+                        0%, 100% { transform: translate(-50%, -50%); }
+                        25% { transform: translate(-45%, -50%); }
+                        75% { transform: translate(-55%, -50%); }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(errorElement);
+
+                setTimeout(() => {
+                    document.body.removeChild(errorElement);
+                    document.head.removeChild(style);
+                }, 2000);
+            }
+
+            showNicknameSaved() {
+                const savedElement = document.createElement('div');
+                savedElement.textContent = 'Никнейм сохранен!';
+                savedElement.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(45deg, #4CAF50, #45a049);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+                    animation: successPulse 1.5s ease-out;
+                `;
+
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes successPulse {
+                        0% {
+                            opacity: 0;
+                            transform: translate(-50%, -50%) scale(0.5);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: translate(-50%, -50%) scale(1.1);
+                        }
+                        100% {
+                            opacity: 0;
+                            transform: translate(-50%, -50%) scale(1);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(savedElement);
+
+                setTimeout(() => {
+                    document.body.removeChild(savedElement);
+                    document.head.removeChild(style);
+                }, 1500);
             }
         }
 
