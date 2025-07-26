@@ -85,16 +85,7 @@
             outline: none;
         }
 
-        .role-filter {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            border: 1px solid var(--tg-theme-secondary-bg-color);
-            border-radius: 8px;
-            background: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-        }
+
 
         .hero-list {
             display: flex;
@@ -216,6 +207,22 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 20px;
+        }
+
+        .profile-user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .profile-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
         /* Анимированная аватарка */
@@ -268,16 +275,22 @@
 
         .profile-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 0;
+            width: 100%;
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            color: var(--tg-theme-text-color);
         }
 
         .profile-stats {
             width: 100%;
-            margin-bottom: 20px;
             background: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         .stat-item {
@@ -299,7 +312,11 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
 
         .settings-button {
@@ -815,12 +832,6 @@
 <body>
     <div class="app-container">
         <div id="counter-picks" class="tab-content" style="display: block;">
-            <select id="role-filter-counter" class="role-filter">
-                <option value="">Все роли</option>
-                <option value="Support">Support</option>
-                <option value="Carry">Carry</option>
-                <option value="Midlane">Midlane</option>
-            </select>
             <input type="text" id="hero-search" class="search-bar" placeholder="Поиск героя...">
             <div class="hero-list" id="counter-hero-list">
                 <!-- Hero items for counter picks will be injected here -->
@@ -845,72 +856,80 @@
                     <h2>Ваш Профиль</h2>
                 </div>
                 
-                <!-- Анимированная аватарка -->
-                <div class="avatar-container">
-                    <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
-                </div>
-                
-                <!-- Nickname Display -->
-                <div class="nickname-display-simple">
-                    <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
-                </div>
-                
-                <!-- Level System -->
-                <div class="level-container">
-                    <div class="level-header">
-                        <div class="level-info">
-                            <div class="level-number" id="user-level">25</div>
-                            <div class="level-title">Dota Master</div>
-                        </div>
+                <!-- User Info Section -->
+                <div class="profile-user-info">
+                    <!-- Анимированная аватарка -->
+                    <div class="avatar-container">
+                        <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png" alt="Avatar" class="avatar">
                     </div>
                     
-                    <div class="xp-container">
-                        <div class="xp-text">
-                            <span>XP: <span id="current-xp">7,450</span> / <span id="next-level-xp">10,000</span></span>
-                            <span id="xp-to-next">2,550 до след. уровня</span>
-                        </div>
-                        <div class="xp-bar">
-                            <div class="xp-progress" id="xp-progress" style="width: 74.5%;"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="level-perks">
-                        <div class="perk-item">
-                            <div class="perk-icon">⭐</div>
-                            <span>Доступ к продвинутому анализу матчей</span>
-                        </div>
-                        <div class="perk-item">
-                            <div class="perk-icon">🏆</div>
-                            <span>Эксклюзивные билды героев</span>
-                        </div>
-                        <div class="perk-item">
-                            <div class="perk-icon">📊</div>
-                            <span>Подробная статистика прогресса</span>
-                        </div>
-                    </div>
-                    
-                    <div class="next-level-preview">
-                        <strong>Уровень 26:</strong> Разблокировка персональных рекомендаций ИИ
+                    <!-- Nickname Display -->
+                    <div class="nickname-display-simple">
+                        <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
                     </div>
                 </div>
                 
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <strong>MMR:</strong> 4500
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Level System -->
+                    <div class="level-container">
+                        <div class="level-header">
+                            <div class="level-info">
+                                <div class="level-number" id="user-level">25</div>
+                                <div class="level-title">Dota Master</div>
+                            </div>
+                        </div>
+                        
+                        <div class="xp-container">
+                            <div class="xp-text">
+                                <span>XP: <span id="current-xp">7,450</span> / <span id="next-level-xp">10,000</span></span>
+                                <span id="xp-to-next">2,550 до след. уровня</span>
+                            </div>
+                            <div class="xp-bar">
+                                <div class="xp-progress" id="xp-progress" style="width: 74.5%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="level-perks">
+                            <div class="perk-item">
+                                <div class="perk-icon">⭐</div>
+                                <span>Доступ к продвинутому анализу матчей</span>
+                            </div>
+                            <div class="perk-item">
+                                <div class="perk-icon">🏆</div>
+                                <span>Эксклюзивные билды героев</span>
+                            </div>
+                            <div class="perk-item">
+                                <div class="perk-icon">📊</div>
+                                <span>Подробная статистика прогресса</span>
+                            </div>
+                        </div>
+                        
+                        <div class="next-level-preview">
+                            <strong>Уровень 26:</strong> Разблокировка персональных рекомендаций ИИ
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <strong>Winrate:</strong> 55%
+                    
+                    <!-- Game Statistics -->
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <strong>MMR:</strong> 4500
+                        </div>
+                        <div class="stat-item">
+                            <strong>Winrate:</strong> 55%
+                        </div>
+                        <div class="stat-item">
+                            <strong>Любимый герой:</strong> Rubick
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <strong>Любимый герой:</strong> Rubick
+                    
+                    <!-- Profile Settings -->
+                    <div class="profile-settings">
+                        <button class="settings-button">Изменить аватар</button>
+                        <button class="settings-button">Настройки уведомлений</button>
+                        <button class="settings-button">Поделиться профилем</button>
+                        <button class="settings-button" id="change-nickname-btn">Изменить ник</button>
                     </div>
-                </div>
-                <!-- Блок достижений удален -->
-                <div class="profile-settings">
-                    <button class="settings-button">Изменить аватар</button>
-                    <button class="settings-button">Настройки уведомлений</button>
-                    <button class="settings-button">Поделиться профилем</button>
-                    <button class="settings-button" id="change-nickname-btn">Изменить ник</button>
                 </div>
             </div>
         </div>
