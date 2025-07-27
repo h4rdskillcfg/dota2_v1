@@ -463,6 +463,9 @@
             flex-direction: column;
             align-items: center;
             gap: 24px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .profile-user-info {
@@ -471,13 +474,15 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
         .profile-content {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            align-items: center;
+            gap: 20px;
         }
 
         /* Анимированная аватарка */
@@ -581,15 +586,17 @@
         }
 
         .profile-settings {
-            width: 100%;
+            width: 90%;
+            max-width: 320px;
+            margin: 16px auto;
             display: flex;
             flex-direction: column;
             gap: 0;
             background: var(--glass-bg);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px var(--shadow-medium);
+            border-radius: 18px 18px 18px 18px;
+            box-shadow: 0 6px 20px var(--shadow-medium);
             border: 1px solid var(--separator);
             overflow: hidden;
         }
@@ -598,11 +605,11 @@
             background: transparent;
             color: var(--text-primary);
             border: none;
-            padding: 18px 24px;
+            padding: 16px 20px;
             text-align: left;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 400;
             border-bottom: 1px solid var(--separator);
             position: relative;
@@ -925,6 +932,50 @@
             }
         }
 
+        /* Адаптация плашки настроек для маленьких экранов */
+        @media (max-width: 375px) {
+            .profile-settings {
+                width: 85%;
+                padding: 14px;
+                margin: 10px auto;
+                border-radius: 14px;
+            }
+            
+            .settings-button {
+                padding: 14px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* Адаптация плашки настроек для средних экранов */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .profile-settings {
+                width: 88%;
+                padding: 16px;
+                margin: 12px auto;
+            }
+            
+            .settings-button {
+                padding: 16px 18px;
+                font-size: 15px;
+            }
+        }
+
+        /* Адаптация плашки настроек для больших экранов */
+        @media (min-width: 415px) {
+            .profile-settings {
+                width: 92%;
+                max-width: 350px;
+                padding: 18px;
+                margin: 16px auto;
+            }
+            
+            .settings-button {
+                padding: 18px 22px;
+                font-size: 16px;
+            }
+        }
+
         /* Simple Nickname Display */
         .nickname-display-simple {
             margin: 15px 0 20px 0;
@@ -955,6 +1006,95 @@
             100% {
                 transform: scale(1);
                 color: var(--text-primary);
+            }
+        }
+
+        /* Premium Badge Styles */
+        .premium-badge {
+            display: none;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+            border-radius: 20px;
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            animation: premiumGlow 2s ease-in-out infinite alternate;
+        }
+
+        .premium-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: premiumShine 3s ease-in-out infinite;
+        }
+
+        @keyframes premiumGlow {
+            from {
+                box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+                transform: scale(1);
+            }
+            to {
+                box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes premiumShine {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .premium-badge.show {
+            display: block;
+            animation: premiumBadgeAppear 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+        }
+
+        @keyframes premiumBadgeAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Адаптация плашки для маленьких экранов */
+        @media (max-width: 375px) {
+            .premium-badge {
+                font-size: 10px;
+                padding: 5px 10px;
+                margin-top: 6px;
+            }
+        }
+
+        /* Адаптация плашки для средних экранов */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .premium-badge {
+                font-size: 11px;
+                padding: 6px 12px;
+                margin-top: 8px;
+            }
+        }
+
+        /* Адаптация плашки для больших экранов */
+        @media (min-width: 415px) {
+            .premium-badge {
+                font-size: 12px;
+                padding: 7px 14px;
+                margin-top: 10px;
             }
         }
 
@@ -1397,6 +1537,7 @@
                     <!-- Nickname Display -->
                     <div class="nickname-display-simple">
                         <span class="nickname-text" id="nickname-text">Dota_Master_2024</span>
+                        <div class="premium-badge" id="premium-badge">DOTA HELPER ++</div>
                     </div>
                 </div>
                 
@@ -2028,6 +2169,11 @@
                 // Grant access
                 localStorage.setItem('metaAccess', 'true');
                 
+                // Update premium badge if level system exists
+                if (window.levelSystem) {
+                    window.levelSystem.updatePremiumBadge();
+                }
+                
                 // Hide overlay after 2 seconds and switch to Meta tab
                 setTimeout(() => {
                     subscriptionOverlay.style.display = 'none';
@@ -2055,6 +2201,11 @@
             
             // Grant access
             localStorage.setItem('metaAccess', 'true');
+            
+            // Update premium badge if level system exists
+            if (window.levelSystem) {
+                window.levelSystem.updatePremiumBadge();
+            }
             
             // Hide overlay after 2 seconds and switch to Meta tab
             setTimeout(() => {
@@ -2340,6 +2491,22 @@
                 } else {
                     console.error('Элемент никнейма не найден при обновлении');
                 }
+                
+                // Проверяем наличие подписки и показываем плашку
+                this.updatePremiumBadge();
+            }
+
+            updatePremiumBadge() {
+                const premiumBadge = document.getElementById('premium-badge');
+                const hasSubscription = localStorage.getItem('metaAccess') === 'true';
+                
+                if (premiumBadge) {
+                    if (hasSubscription) {
+                        premiumBadge.classList.add('show');
+                    } else {
+                        premiumBadge.classList.remove('show');
+                    }
+                }
             }
 
             setupNicknameListeners() {
@@ -2556,6 +2723,7 @@
         function initializeLevelSystem() {
             if (!levelSystem) {
                 levelSystem = new LevelSystem();
+                window.levelSystem = levelSystem; // Make it globally accessible
             }
         }
 
