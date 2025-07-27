@@ -647,13 +647,13 @@
         /* Level System Styles */
         .level-container {
             width: 100%;
-            margin: 20px 0;
+            margin: 16px 0;
             background: var(--glass-bg);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
-            padding: 28px;
-            border-radius: 24px;
-            box-shadow: 0 12px 40px var(--shadow-medium);
+            padding: 20px;
+            border-radius: 20px 20px 20px 20px;
+            box-shadow: 0 8px 24px var(--shadow-medium);
             border: 1px solid var(--separator);
             position: relative;
             overflow: hidden;
@@ -680,17 +680,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .level-number {
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: 800;
             background: var(--accent-gradient);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6));
+            filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.6));
             animation: pulse-glow 3s ease-in-out infinite alternate;
         }
 
@@ -706,28 +706,28 @@
         }
 
         .level-title {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: var(--text-primary);
             opacity: 0.9;
         }
 
         .xp-container {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .xp-text {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9em;
+            margin-bottom: 6px;
+            font-size: 0.85em;
             opacity: 0.8;
         }
 
         .xp-bar {
             width: 100%;
-            height: 10px;
+            height: 8px;
             background: var(--separator);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             position: relative;
             box-shadow: inset 0 2px 4px var(--shadow-light);
@@ -760,11 +760,11 @@
         }
 
         .level-perks {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 16px;
+            padding: 16px;
             background: var(--accent-light);
-            border-radius: 16px;
-            border-left: 4px solid var(--accent-primary);
+            border-radius: 14px;
+            border-left: 3px solid var(--accent-primary);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
         }
@@ -772,8 +772,8 @@
         .perk-item {
             display: flex;
             align-items: center;
-            margin: 8px 0;
-            font-size: 0.9em;
+            margin: 6px 0;
+            font-size: 0.85em;
             opacity: 0;
             animation: fadeInUp 0.5s ease-out forwards;
         }
@@ -794,27 +794,72 @@
         }
 
         .perk-icon {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
             background: var(--accent-gradient);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             color: white;
-            box-shadow: 0 2px 8px var(--accent-medium);
+            box-shadow: 0 2px 6px var(--accent-medium);
         }
 
         .next-level-preview {
-            margin-top: 15px;
-            padding: 12px;
+            margin-top: 12px;
+            padding: 10px;
             background: var(--accent-light);
             border-radius: 8px;
             border-left: 3px solid var(--accent-primary);
-            font-size: 0.85em;
+            font-size: 0.8em;
             opacity: 0.9;
+        }
+
+        /* Адаптация для маленьких экранов */
+        @media (max-width: 375px) {
+            .level-container {
+                padding: 16px;
+                margin: 12px 0;
+                border-radius: 16px;
+            }
+            
+            .level-number {
+                font-size: 2.2em;
+            }
+            
+            .level-title {
+                font-size: 1em;
+            }
+            
+            .level-perks {
+                padding: 12px;
+                margin-top: 12px;
+            }
+            
+            .perk-item {
+                font-size: 0.8em;
+                margin: 4px 0;
+            }
+            
+            .perk-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
+            }
+        }
+
+        /* Адаптация для средних экранов */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .level-container {
+                padding: 18px;
+                margin: 14px 0;
+            }
+            
+            .level-number {
+                font-size: 2.4em;
+            }
         }
 
         /* Simple Nickname Display */
