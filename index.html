@@ -1963,43 +1963,43 @@
                     
                     <div class="case-preview">
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png" alt="Aghanim's Scepter">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png" alt="Aghanim's Scepter" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Aghanim's Scepter</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/black_king_bar.png" alt="Black King Bar">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/black_king_bar.png" alt="Black King Bar" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Black King Bar</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/radiance.png" alt="Radiance">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/radiance.png" alt="Radiance" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Radiance</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/assault.png" alt="Assault Cuirass">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/assault.png" alt="Assault Cuirass" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Assault Cuirass</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png" alt="Butterfly">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png" alt="Butterfly" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Butterfly</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/abyssal_blade.png" alt="Abyssal Blade">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/abyssal_blade.png" alt="Abyssal Blade" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Abyssal Blade</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/daedalus.png" alt="Daedalus">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lesser_crit.png" alt="Daedalus" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Daedalus</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png" alt="Heart of Tarrasque">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png" alt="Heart of Tarrasque" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Heart of Tarrasque</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/rapier.png" alt="Divine Rapier">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/rapier.png" alt="Divine Rapier" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Divine Rapier</span>
                         </div>
                         <div class="preview-item">
-                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter_2.png" alt="Aghanim's Blessing">
+                            <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter_2.png" alt="Aghanim's Blessing" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                             <span>Aghanim's Blessing</span>
                         </div>
                     </div>
@@ -2106,6 +2106,11 @@
         const historyList = document.getElementById('history-list');
         let isOpening = false;
 
+        // Function to get correct image for items
+        function getItemImage(item) {
+            return item.image;
+        }
+
         // Case items configuration with probabilities
         const caseItemsList = [
             { name: 'Aghanim\'s Scepter', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png', rarity: 'rare', probability: 0.15 },
@@ -2114,11 +2119,12 @@
             { name: 'Assault Cuirass', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/assault.png', rarity: 'rare', probability: 0.15 },
             { name: 'Butterfly', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png', rarity: 'legendary', probability: 0.10 },
             { name: 'Abyssal Blade', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/abyssal_blade.png', rarity: 'legendary', probability: 0.10 },
-            { name: 'Daedalus', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/daedalus.png', rarity: 'legendary', probability: 0.10 },
+            { name: 'Daedalus', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/lesser_crit.png', rarity: 'legendary', probability: 0.10 },
             { name: 'Heart of Tarrasque', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/heart.png', rarity: 'legendary', probability: 0.10 },
             { name: 'Divine Rapier', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/rapier.png', rarity: 'arcana', probability: 0.03 },
             { name: 'Aghanim\'s Blessing', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter_2.png', rarity: 'arcana', probability: 0.02 },
             { name: 'Rubick Arcana', image: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/rubick.png', rarity: 'arcana', probability: 0.01 },
+
             { name: 'Subscription', type: 'subscription', rarity: 'arcana', probability: 0.05 }
         ];
 
@@ -2131,7 +2137,7 @@
                 const itemElement = document.createElement('div');
                 itemElement.className = `case-item ${randomItem.rarity}`;
                 itemElement.innerHTML = `
-                    <img src="${randomItem.image}" alt="${randomItem.name}">
+                    <img src="${getItemImage(randomItem)}" alt="${randomItem.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                     <span>${randomItem.name}</span>
                 `;
                 caseItems.appendChild(itemElement);
@@ -2148,7 +2154,7 @@
                 itemElement.className = `case-item ${randomItem.rarity}`;
                 
                 itemElement.innerHTML = `
-                    <img src="${randomItem.image}" alt="${randomItem.name}">
+                    <img src="${getItemImage(randomItem)}" alt="${randomItem.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                     <span>${randomItem.name}</span>
                 `;
                 caseItems.appendChild(itemElement);
@@ -2161,7 +2167,7 @@
             selectedItemElement.dataset.selectedItem = selectedItem.name; // Store item name for verification
             
             selectedItemElement.innerHTML = `
-                <img src="${selectedItem.image}" alt="${selectedItem.name}">
+                <img src="${getItemImage(selectedItem)}" alt="${selectedItem.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                 <span>${selectedItem.name}</span>
             `;
             caseItems.appendChild(selectedItemElement);
@@ -2173,7 +2179,7 @@
                 itemElement.className = `case-item ${randomItem.rarity}`;
                 
                 itemElement.innerHTML = `
-                    <img src="${randomItem.image}" alt="${randomItem.name}">
+                    <img src="${getItemImage(randomItem)}" alt="${randomItem.name}" onerror="this.src='https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/blink.png'">
                     <span>${randomItem.name}</span>
                 `;
                 caseItems.appendChild(itemElement);
@@ -2519,7 +2525,7 @@
             },
             {
                 name: 'Wraith King',
-                icon: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/wraith_king.png',
+                icon: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/skeleton_king.png',
                 counters: [
                     { name: 'Underlord', ability: 'Pit of Malice', abilityIcon: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/abyssal_underlord_pit_of_malice.png', reason: 'AoE-дамаг и редукция армора снижают durability Wraith King в боях.' },
                     { name: 'Necrophos', ability: 'Reaper\'s Scythe', abilityIcon: 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/necronomicon_reapers_scythe.png', reason: 'Дамаг over time и редукция хила контрит реген и здоровье Wraith King.' },
