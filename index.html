@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOTA 2 Helper - Telegram Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         :root {
             --primary-bg: #ffffff;
@@ -28,12 +28,6 @@
             --shadow-heavy: rgba(0, 0, 0, 0.15);
             --backdrop-blur: blur(20px);
             
-            /* Fixed white theme - no system theme following */
-            --tg-theme-bg-color: var(--primary-bg);
-            --tg-theme-text-color: var(--text-primary);
-            --tg-theme-button-color: var(--accent-primary);
-            --tg-theme-button-text-color: #ffffff;
-            --tg-theme-secondary-bg-color: var(--secondary-bg);
             --ios-backdrop-blur: var(--backdrop-blur);
         }
 
@@ -80,15 +74,18 @@
         .tab-bar {
             display: flex;
             justify-content: space-around;
-            background: var(--glass-bg);
-            backdrop-filter: var(--backdrop-blur);
-            -webkit-backdrop-filter: var(--backdrop-blur);
-            padding: 8px 0 34px 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 8px 0 32px 0;
             position: fixed;
             bottom: 0;
             width: 100%;
-            border-top: 1px solid var(--separator);
-            box-shadow: 0 -8px 32px var(--shadow-heavy);
+            border-top: 1px solid rgba(142, 142, 147, 0.2);
+            box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1), 0 -8px 32px rgba(0, 0, 0, 0.12);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .tab-button {
@@ -97,37 +94,126 @@
             cursor: pointer;
             padding: 4px 8px;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            color: var(--text-tertiary);
-            font-size: 10px;
+            color: #86868b;
+            font-size: 9px;
             font-weight: 500;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
-            min-width: 60px;
+            gap: 3px;
+            min-width: 50px;
+            max-width: 80px;
             letter-spacing: -0.24px;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
         }
 
         .tab-button::before {
             content: '';
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            background: var(--accent-gradient);
-            opacity: 0.2;
-            margin-bottom: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+            opacity: 0;
+            margin-bottom: 3px;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 4px 15px var(--shadow-light);
+            box-shadow: 0 3px 8px rgba(0, 122, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+            z-index: 0;
+        }
+
+        .tab-button:hover::after {
+            left: 100%;
         }
 
         .tab-button.active {
-            color: var(--text-primary);
-            transform: translateY(-2px);
+            color: #007AFF;
+            transform: translateY(-1px);
         }
 
         .tab-button.active::before {
             opacity: 1;
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+
+        .tab-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Адаптация для маленьких экранов */
+        @media (max-width: 375px) {
+            .tab-bar {
+                padding: 6px 0 28px 0;
+            }
+            
+            .tab-button {
+                padding: 3px 6px;
+                font-size: 8px;
+                min-width: 45px;
+                gap: 2px;
+            }
+            
+            .tab-button::before {
+                width: 20px;
+                height: 20px;
+                border-radius: 5px;
+                margin-bottom: 2px;
+            }
+        }
+
+        /* Адаптация для средних экранов */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .tab-bar {
+                padding: 7px 0 30px 0;
+            }
+            
+            .tab-button {
+                padding: 4px 7px;
+                font-size: 9px;
+                min-width: 48px;
+                gap: 3px;
+            }
+            
+            .tab-button::before {
+                width: 22px;
+                height: 22px;
+                border-radius: 6px;
+                margin-bottom: 3px;
+            }
+        }
+
+        /* Адаптация для больших экранов */
+        @media (min-width: 415px) {
+            .tab-bar {
+                padding: 10px 0 36px 0;
+            }
+            
+            .tab-button {
+                padding: 5px 10px;
+                font-size: 10px;
+                min-width: 55px;
+                gap: 4px;
+            }
+            
+            .tab-button::before {
+                width: 26px;
+                height: 26px;
+                border-radius: 7px;
+                margin-bottom: 4px;
+            }
         }
 
         .search-bar {
@@ -346,7 +432,7 @@
 
         .counter-pick, .build-stage {
             margin-bottom: 15px;
-            background: var(--tg-theme-secondary-bg-color);
+            background: var(--secondary-bg);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -406,7 +492,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 3px solid var(--tg-theme-button-color);
+            border: 3px solid var(--accent-primary);
             position: relative;
             z-index: 2;
         }
@@ -887,7 +973,7 @@
 
         .counter-pick, .build-stage {
             margin-bottom: 15px;
-            background: var(--tg-theme-secondary-bg-color);
+            background: var(--secondary-bg);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -909,28 +995,33 @@
         }
 
         .subscription-content {
-            background: var(--card-bg);
-            padding: 30px 25px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 32px 24px;
+            border-radius: 20px;
             width: 90%;
             max-width: 340px;
             text-align: center;
-            box-shadow: 0 8px 32px var(--shadow-medium);
-            border: 1px solid var(--separator);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .subscription-title {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             margin-bottom: 8px;
-            color: var(--text-primary);
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
         }
 
         .subscription-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
+            font-size: 16px;
+            color: #86868b;
+            margin-bottom: 28px;
             line-height: 1.4;
+            font-weight: 400;
         }
 
         .subscription-options {
@@ -941,100 +1032,174 @@
         }
 
         .subscription-option {
-            background: var(--accent-light);
-            border: 1px solid var(--separator);
-            padding: 16px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            background: rgba(0, 122, 255, 0.05);
+            border: 1.5px solid rgba(0, 122, 255, 0.2);
+            padding: 20px 16px;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscription-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .subscription-option:hover::before {
+            left: 100%;
         }
 
         .subscription-option.selected {
-            background: var(--accent-medium);
-            border-color: var(--accent-primary);
+            background: rgba(0, 122, 255, 0.1);
+            border-color: #007AFF;
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .option-title {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1d1d1f;
+            letter-spacing: -0.24px;
         }
 
         .option-price {
-            font-size: 1.5rem;
+            font-size: 28px;
             font-weight: 700;
-            color: var(--accent-primary);
-            margin-bottom: 4px;
+            color: #007AFF;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
         }
 
         .option-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            font-size: 14px;
+            color: #86868b;
+            font-weight: 400;
+            line-height: 1.3;
         }
 
         .divider {
             display: flex;
             align-items: center;
-            margin: 20px 0;
-            color: var(--text-tertiary);
-            font-size: 0.8rem;
+            margin: 24px 0;
+            color: #86868b;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: -0.24px;
         }
 
         .divider::before, .divider::after {
             content: "";
             flex: 1;
-            border-bottom: 1px solid var(--separator);
+            border-bottom: 1px solid rgba(142, 142, 147, 0.2);
         }
 
         .divider::before {
-            margin-right: 12px;
+            margin-right: 16px;
         }
 
         .divider::after {
-            margin-left: 12px;
+            margin-left: 16px;
         }
 
         .promo-code-input {
             width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            background: var(--secondary-bg);
-            border: 1px solid var(--separator);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            background: rgba(142, 142, 147, 0.08);
+            border: 1.5px solid rgba(142, 142, 147, 0.2);
             border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            transition: border 0.3s;
+            color: #1d1d1f;
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-sizing: border-box;
+            letter-spacing: -0.24px;
         }
 
         .promo-code-input:focus {
             outline: none;
-            border-color: var(--accent-primary);
-            background: var(--primary-bg);
+            border-color: #007AFF;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .promo-code-input::placeholder {
+            color: #86868b;
+            font-weight: 400;
         }
 
         .subscribe-button {
             width: 100%;
-            padding: 14px;
-            background: var(--accent-primary);
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 17px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            letter-spacing: -0.24px;
+        }
+
+        .subscribe-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
         }
 
         .subscribe-button:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #0056CC 0%, #004499 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+        }
+
+        .subscribe-button:hover::before {
+            left: 100%;
+        }
+
+        .subscribe-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
         }
 
         .subscribe-button.secondary {
-            background: transparent;
-            color: var(--accent-primary);
-            border: 1px solid var(--accent-primary);
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+            border: 1.5px solid #007AFF;
             margin-top: 12px;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.1);
+        }
+
+        .subscribe-button.secondary:hover {
+            background: rgba(0, 122, 255, 0.15);
+            border-color: #0056CC;
+            color: #0056CC;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+        }
+
+        .subscribe-button.secondary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.1);
         }
 
         .success-animation {
@@ -1046,29 +1211,42 @@
         }
 
         .success-icon {
-            font-size: 64px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+            font-size: 72px;
+            color: #34C759;
+            margin-bottom: 24px;
+            animation: checkmark 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+            filter: drop-shadow(0 4px 12px rgba(52, 199, 89, 0.3));
         }
 
         @keyframes checkmark {
-            0% { transform: scale(0); opacity: 0; }
-            80% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
+            0% { 
+                transform: scale(0) rotate(-180deg); 
+                opacity: 0; 
+            }
+            50% { 
+                transform: scale(1.2) rotate(0deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(1) rotate(0deg); 
+                opacity: 1; 
+            }
         }
 
         .success-message {
-            font-size: 1.3rem;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
             margin-bottom: 8px;
-            color: var(--text-primary);
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
         }
 
         .success-submessage {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
+            font-size: 16px;
+            color: #86868b;
+            margin-bottom: 28px;
+            font-weight: 400;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -1222,22 +1400,7 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
 
-        // Fixed white theme - no system theme following
-        // All theme colors are now hardcoded to white theme
-        document.documentElement.style.setProperty('--tg-theme-bg-color', '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', '#1a1a1a');
-        document.documentElement.style.setProperty('--tg-theme-button-color', '#3b82f6');
-        document.documentElement.style.setProperty('--tg-theme-button-text-color', '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', '#f8f9fa');
-
-        // Remove theme change listener to prevent automatic theme switching
-        // tg.onEvent('themeChanged', () => {
-        //     // Theme change events are ignored to maintain white theme
-        // });
 
         // Tab switching for main tabs
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -2066,22 +2229,47 @@
                 const nicknameText = document.getElementById('nickname-text');
                 if (nicknameText) {
                     nicknameText.textContent = savedNickname;
+                } else {
+                    console.error('Элемент никнейма не найден при обновлении');
                 }
             }
 
             setupNicknameListeners() {
                 const changeNicknameBtn = document.getElementById('change-nickname-btn');
                 
-                if (!changeNicknameBtn) return;
+                if (!changeNicknameBtn) {
+                    console.log('Кнопка изменения никнейма не найдена');
+                    return;
+                }
+
+                // Удаляем старые обработчики, если они есть
+                const newBtn = changeNicknameBtn.cloneNode(true);
+                changeNicknameBtn.parentNode.replaceChild(newBtn, changeNicknameBtn);
 
                 // Открытие модального окна для изменения ника
-                changeNicknameBtn.addEventListener('click', () => {
+                newBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.openNicknameModal();
                 });
+
+                console.log('Обработчик для кнопки изменения никнейма установлен');
             }
 
             openNicknameModal() {
-                const currentNickname = document.getElementById('nickname-text').textContent;
+                const nicknameTextElement = document.getElementById('nickname-text');
+                if (!nicknameTextElement) {
+                    console.error('Элемент никнейма не найден');
+                    return;
+                }
+                
+                const currentNickname = nicknameTextElement.textContent;
+                
+                // Удаляем существующие модальные окна, если они есть
+                const existingModal = document.querySelector('.nickname-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
                 
                 // Создаем модальное окно
                 const modal = document.createElement('div');
@@ -2101,10 +2289,12 @@
                 
                 // Фокус на поле ввода
                 const input = modal.querySelector('#modal-nickname-input');
-                setTimeout(() => {
-                    input.focus();
-                    input.select();
-                }, 100);
+                if (input) {
+                    setTimeout(() => {
+                        input.focus();
+                        input.select();
+                    }, 100);
+                }
                 
                 // Обработчики событий
                 const saveBtn = modal.querySelector('#modal-save-btn');
@@ -2130,17 +2320,21 @@
                     
                     // Сохраняем никнейм
                     const nicknameText = document.getElementById('nickname-text');
-                    nicknameText.textContent = newNickname;
-                    localStorage.setItem('userNickname', newNickname);
-                    
-                    // Показываем анимацию сохранения
-                    nicknameText.classList.add('nickname-saved-animation');
-                    setTimeout(() => {
-                        nicknameText.classList.remove('nickname-saved-animation');
-                    }, 1000);
-                    
-                    // Показываем уведомление об успешном сохранении
-                    this.showNicknameSaved();
+                    if (nicknameText) {
+                        nicknameText.textContent = newNickname;
+                        localStorage.setItem('userNickname', newNickname);
+                        
+                        // Показываем анимацию сохранения
+                        nicknameText.classList.add('nickname-saved-animation');
+                        setTimeout(() => {
+                            nicknameText.classList.remove('nickname-saved-animation');
+                        }, 1000);
+                        
+                        // Показываем уведомление об успешном сохранении
+                        this.showNicknameSaved();
+                    } else {
+                        console.error('Элемент никнейма не найден при сохранении');
+                    }
                     
                     closeModal();
                 };
@@ -2249,18 +2443,57 @@
         }
 
         // Инициализируем систему уровней при загрузке страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            new LevelSystem();
-        });
+        let levelSystem;
+        
+        function initializeLevelSystem() {
+            if (!levelSystem) {
+                levelSystem = new LevelSystem();
+            }
+        }
 
         // Если DOM уже загружен
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                new LevelSystem();
-            });
+            document.addEventListener('DOMContentLoaded', initializeLevelSystem);
         } else {
-            new LevelSystem();
+            initializeLevelSystem();
         }
+
+        // Дополнительная инициализация для кнопки изменения никнейма
+        document.addEventListener('DOMContentLoaded', () => {
+            const changeNicknameBtn = document.getElementById('change-nickname-btn');
+            if (changeNicknameBtn && !changeNicknameBtn.hasAttribute('data-initialized')) {
+                changeNicknameBtn.setAttribute('data-initialized', 'true');
+                changeNicknameBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (levelSystem) {
+                        levelSystem.openNicknameModal();
+                    } else {
+                        console.error('Система уровней не инициализирована');
+                    }
+                });
+                console.log('Дополнительный обработчик для кнопки изменения никнейма установлен');
+            }
+        });
+
+        // Резервная инициализация через небольшую задержку
+        setTimeout(() => {
+            const changeNicknameBtn = document.getElementById('change-nickname-btn');
+            if (changeNicknameBtn && !changeNicknameBtn.hasAttribute('data-initialized')) {
+                changeNicknameBtn.setAttribute('data-initialized', 'true');
+                changeNicknameBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (levelSystem) {
+                        levelSystem.openNicknameModal();
+                    } else {
+                        console.error('Система уровней не инициализирована');
+                    }
+                });
+                console.log('Резервный обработчик для кнопки изменения никнейма установлен');
+            }
+        }, 1000);
     </script>
 </body>
 </html>
+
