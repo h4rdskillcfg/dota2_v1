@@ -1213,6 +1213,7 @@
             border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
             box-sizing: border-box;
+            transition: transform 0.1s ease;
         }
 
         .case-item img {
@@ -2221,19 +2222,33 @@
             
             // Calculate final scroll distance to center the selected item
             const adjustedScrollDistance = scrollDistance - centerAdjustment;
+            
+            // Ensure the scroll distance is positive and reasonable
+            const finalScrollDistance = Math.max(0, Math.min(adjustedScrollDistance, 10000));
 
             // Debug: Log the selected item
             console.log('Selected item:', selectedItem.name);
-            console.log('Scroll distance:', adjustedScrollDistance);
+            console.log('Scroll distance:', finalScrollDistance);
             console.log('Item center offset:', itemCenterOffset);
             console.log('Viewport center offset:', viewportCenterOffset);
             console.log('Center adjustment:', centerAdjustment);
 
+            // Verify elements exist before starting animation
+            if (!caseItems) {
+                console.error('Case items container not found!');
+                return;
+            }
+            
             // Start smooth scrolling animation
-            animateCaseOpening(adjustedScrollDistance, selectedItem);
+            animateCaseOpening(finalScrollDistance, selectedItem);
         }
 
         function animateCaseOpening(targetDistance, selectedItem) {
+            if (!caseItems) {
+                console.error('Case items container not found in animation!');
+                return;
+            }
+            
             const duration = 4000; // 4 seconds total
             const startTime = performance.now();
             let currentDistance = 0;
@@ -2242,18 +2257,8 @@
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // Multi-stage easing: fast start, medium middle, slow end
-                let easeProgress;
-                if (progress < 0.3) {
-                    // Fast start (0-30%)
-                    easeProgress = progress / 0.3 * 0.6; // 0-60% of distance
-                } else if (progress < 0.7) {
-                    // Medium middle (30-70%)
-                    easeProgress = 0.6 + (progress - 0.3) / 0.4 * 0.3; // 60-90% of distance
-                } else {
-                    // Slow end (70-100%)
-                    easeProgress = 0.9 + (progress - 0.7) / 0.3 * 0.1; // 90-100% of distance
-                }
+                // Smooth easing function: fast start, slow end
+                const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
                 
                 currentDistance = targetDistance * easeProgress;
                 caseItems.style.transform = `translateX(-${currentDistance}px)`;
@@ -2271,6 +2276,8 @@
                         selectedItemElement.classList.add('center');
                         console.log('Selected item:', selectedItemElement.querySelector('span').textContent);
                         console.log('Item is now centered in viewport');
+                    } else {
+                        console.error('Selected item not found!');
                     }
                     
                     // Show result
