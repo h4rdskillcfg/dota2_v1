@@ -2158,6 +2158,7 @@
             const selectedItemElement = document.createElement('div');
             selectedItemElement.className = `case-item ${selectedItem.rarity}`;
             selectedItemElement.id = 'selected-item'; // Mark the selected item
+            selectedItemElement.dataset.selectedItem = selectedItem.name; // Store item name for verification
             
             selectedItemElement.innerHTML = `
                 <img src="${selectedItem.image}" alt="${selectedItem.name}">
@@ -2209,15 +2210,15 @@
             // Generate items with the selected item at a specific position
             generateCaseItemsWithSelected(selectedItem);
 
-            // Calculate scroll position to land on the selected item
+            // Get actual viewport width for mobile compatibility
+            const actualViewportWidth = window.innerWidth || 400;
             const itemWidth = 100; // 80px item + 20px margin
             const selectedItemPosition = 50; // Position where the selected item will be (index 49)
             const scrollDistance = selectedItemPosition * itemWidth;
             
-            // Adjust to center the item in the viewport
-            const viewportWidth = 400; // Approximate viewport width
+            // Adjust to center the item in the actual viewport
             const itemCenterOffset = itemWidth / 2; // Half of item width to center it
-            const viewportCenterOffset = viewportWidth / 2; // Center of viewport
+            const viewportCenterOffset = actualViewportWidth / 2; // Center of actual viewport
             const centerAdjustment = viewportCenterOffset - itemCenterOffset;
             
             // Calculate final scroll distance to center the selected item
@@ -2228,6 +2229,7 @@
 
             // Debug: Log the selected item
             console.log('Selected item:', selectedItem.name);
+            console.log('Actual viewport width:', actualViewportWidth);
             console.log('Scroll distance:', finalScrollDistance);
             console.log('Item center offset:', itemCenterOffset);
             console.log('Viewport center offset:', viewportCenterOffset);
@@ -2276,6 +2278,29 @@
                         selectedItemElement.classList.add('center');
                         console.log('Selected item:', selectedItemElement.querySelector('span').textContent);
                         console.log('Item is now centered in viewport');
+                        
+                        // Verify the item is actually visible in the center
+                        const itemRect = selectedItemElement.getBoundingClientRect();
+                        const viewportCenter = window.innerWidth / 2;
+                        const itemCenter = itemRect.left + itemRect.width / 2;
+                        const distanceFromCenter = Math.abs(itemCenter - viewportCenter);
+                        
+                        console.log('Item center position:', itemCenter);
+                        console.log('Viewport center position:', viewportCenter);
+                        console.log('Distance from center:', distanceFromCenter);
+                        
+                        if (distanceFromCenter > 50) {
+                            console.warn('Item is not properly centered! Distance:', distanceFromCenter);
+                        }
+                        
+                        // Verify the item name matches
+                        const itemName = selectedItemElement.querySelector('span').textContent;
+                        const expectedName = selectedItem.name;
+                        if (itemName !== expectedName) {
+                            console.error('Item name mismatch! Expected:', expectedName, 'Got:', itemName);
+                        } else {
+                            console.log('Item name verification passed:', itemName);
+                        }
                     } else {
                         console.error('Selected item not found!');
                     }
