@@ -547,22 +547,24 @@
         }
 
         .profile-stats {
-            width: 100%;
+            width: 90%;
+            max-width: 320px;
+            margin: 16px auto;
             background: var(--glass-bg);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
-            padding: 24px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px var(--shadow-medium);
+            padding: 16px;
+            border-radius: 18px 18px 18px 18px;
+            box-shadow: 0 6px 20px var(--shadow-medium);
             border: 1px solid var(--separator);
         }
 
         .stat-item {
-            padding: 16px 0;
+            padding: 12px 0;
             text-align: center;
             border-bottom: 1px solid var(--separator);
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            font-size: 17px;
+            font-size: 15px;
             color: var(--text-primary);
         }
 
@@ -646,14 +648,15 @@
 
         /* Level System Styles */
         .level-container {
-            width: 100%;
-            margin: 16px 0;
+            width: 90%;
+            max-width: 320px;
+            margin: 16px auto;
             background: var(--glass-bg);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
-            padding: 20px;
-            border-radius: 20px 20px 20px 20px;
-            box-shadow: 0 8px 24px var(--shadow-medium);
+            padding: 16px;
+            border-radius: 18px 18px 18px 18px;
+            box-shadow: 0 6px 20px var(--shadow-medium);
             border: 1px solid var(--separator);
             position: relative;
             overflow: hidden;
@@ -680,17 +683,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .level-number {
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: 800;
             background: var(--accent-gradient);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.6));
+            filter: drop-shadow(0 0 14px rgba(99, 102, 241, 0.6));
             animation: pulse-glow 3s ease-in-out infinite alternate;
         }
 
@@ -706,31 +709,31 @@
         }
 
         .level-title {
-            font-size: 1.1em;
+            font-size: 1em;
             color: var(--text-primary);
             opacity: 0.9;
         }
 
         .xp-container {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .xp-text {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 0.85em;
+            margin-bottom: 4px;
+            font-size: 0.8em;
             opacity: 0.8;
         }
 
         .xp-bar {
             width: 100%;
-            height: 8px;
+            height: 6px;
             background: var(--separator);
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 2px 4px var(--shadow-light);
+            box-shadow: inset 0 1px 3px var(--shadow-light);
         }
 
         .xp-progress {
@@ -760,10 +763,10 @@
         }
 
         .level-perks {
-            margin-top: 16px;
-            padding: 16px;
+            margin-top: 12px;
+            padding: 12px;
             background: var(--accent-light);
-            border-radius: 14px;
+            border-radius: 12px;
             border-left: 3px solid var(--accent-primary);
             backdrop-filter: var(--backdrop-blur);
             -webkit-backdrop-filter: var(--backdrop-blur);
@@ -772,8 +775,8 @@
         .perk-item {
             display: flex;
             align-items: center;
-            margin: 6px 0;
-            font-size: 0.85em;
+            margin: 4px 0;
+            font-size: 0.8em;
             opacity: 0;
             animation: fadeInUp 0.5s ease-out forwards;
         }
@@ -794,71 +797,131 @@
         }
 
         .perk-icon {
-            width: 18px;
-            height: 18px;
-            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
             background: var(--accent-gradient);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             color: white;
-            box-shadow: 0 2px 6px var(--accent-medium);
+            box-shadow: 0 1px 4px var(--accent-medium);
         }
 
         .next-level-preview {
-            margin-top: 12px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 8px;
             background: var(--accent-light);
             border-radius: 8px;
             border-left: 3px solid var(--accent-primary);
-            font-size: 0.8em;
+            font-size: 0.75em;
             opacity: 0.9;
         }
 
         /* Адаптация для маленьких экранов */
         @media (max-width: 375px) {
             .level-container {
-                padding: 16px;
-                margin: 12px 0;
-                border-radius: 16px;
+                width: 85%;
+                padding: 14px;
+                margin: 10px auto;
+                border-radius: 14px;
             }
             
             .level-number {
-                font-size: 2.2em;
+                font-size: 2em;
             }
             
             .level-title {
-                font-size: 1em;
+                font-size: 0.9em;
             }
             
             .level-perks {
-                padding: 12px;
-                margin-top: 12px;
+                padding: 10px;
+                margin-top: 10px;
             }
             
             .perk-item {
-                font-size: 0.8em;
-                margin: 4px 0;
+                font-size: 0.75em;
+                margin: 3px 0;
             }
             
             .perk-icon {
-                width: 16px;
-                height: 16px;
-                font-size: 9px;
+                width: 14px;
+                height: 14px;
+                font-size: 8px;
             }
         }
 
         /* Адаптация для средних экранов */
         @media (min-width: 376px) and (max-width: 414px) {
             .level-container {
+                width: 88%;
+                padding: 16px;
+                margin: 12px auto;
+            }
+            
+            .level-number {
+                font-size: 2.2em;
+            }
+        }
+
+        /* Адаптация для больших экранов */
+        @media (min-width: 415px) {
+            .level-container {
+                width: 92%;
+                max-width: 350px;
                 padding: 18px;
-                margin: 14px 0;
+                margin: 16px auto;
             }
             
             .level-number {
                 font-size: 2.4em;
+            }
+        }
+
+        /* Адаптация плашки статистики для маленьких экранов */
+        @media (max-width: 375px) {
+            .profile-stats {
+                width: 85%;
+                padding: 14px;
+                margin: 10px auto;
+                border-radius: 14px;
+            }
+            
+            .stat-item {
+                padding: 10px 0;
+                font-size: 14px;
+            }
+        }
+
+        /* Адаптация плашки статистики для средних экранов */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .profile-stats {
+                width: 88%;
+                padding: 16px;
+                margin: 12px auto;
+            }
+            
+            .stat-item {
+                padding: 12px 0;
+                font-size: 15px;
+            }
+        }
+
+        /* Адаптация плашки статистики для больших экранов */
+        @media (min-width: 415px) {
+            .profile-stats {
+                width: 92%;
+                max-width: 350px;
+                padding: 18px;
+                margin: 16px auto;
+            }
+            
+            .stat-item {
+                padding: 14px 0;
+                font-size: 16px;
             }
         }
 
