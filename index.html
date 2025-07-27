@@ -2226,14 +2226,19 @@
             
             // Ensure the scroll distance is positive and reasonable
             const finalScrollDistance = Math.max(0, Math.min(adjustedScrollDistance, 10000));
+            
+            // Add some randomness to make it feel more natural
+            const randomOffset = (Math.random() - 0.5) * 20; // ±10px
+            const finalDistanceWithRandom = finalScrollDistance + randomOffset;
 
             // Debug: Log the selected item
             console.log('Selected item:', selectedItem.name);
             console.log('Actual viewport width:', actualViewportWidth);
-            console.log('Scroll distance:', finalScrollDistance);
+            console.log('Scroll distance:', finalDistanceWithRandom);
             console.log('Item center offset:', itemCenterOffset);
             console.log('Viewport center offset:', viewportCenterOffset);
             console.log('Center adjustment:', centerAdjustment);
+            console.log('Random offset:', randomOffset);
 
             // Verify elements exist before starting animation
             if (!caseItems) {
@@ -2242,7 +2247,7 @@
             }
             
             // Start smooth scrolling animation
-            animateCaseOpening(finalScrollDistance, selectedItem);
+            animateCaseOpening(finalDistanceWithRandom, selectedItem);
         }
 
         function animateCaseOpening(targetDistance, selectedItem) {
@@ -2268,45 +2273,57 @@
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Animation finished
+                    // Animation finished - find the actual item in the center
                     console.log('Animation finished at:', currentDistance);
                     console.log('Target distance was:', targetDistance);
                     
-                    // Find and highlight the selected item
-                    const selectedItemElement = document.getElementById('selected-item');
-                    if (selectedItemElement) {
-                        selectedItemElement.classList.add('center');
-                        console.log('Selected item:', selectedItemElement.querySelector('span').textContent);
-                        console.log('Item is now centered in viewport');
-                        
-                        // Verify the item is actually visible in the center
-                        const itemRect = selectedItemElement.getBoundingClientRect();
-                        const viewportCenter = window.innerWidth / 2;
+                    // Find the item that is actually in the center of the viewport
+                    const items = caseItems.querySelectorAll('.case-item');
+                    const viewportCenter = window.innerWidth / 2;
+                    let centerItem = null;
+                    let minDistance = Infinity;
+                    
+                    items.forEach((item, index) => {
+                        const itemRect = item.getBoundingClientRect();
                         const itemCenter = itemRect.left + itemRect.width / 2;
-                        const distanceFromCenter = Math.abs(itemCenter - viewportCenter);
+                        const distance = Math.abs(itemCenter - viewportCenter);
                         
-                        console.log('Item center position:', itemCenter);
-                        console.log('Viewport center position:', viewportCenter);
-                        console.log('Distance from center:', distanceFromCenter);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            centerItem = item;
+                        }
+                    });
+                    
+                    if (centerItem) {
+                        centerItem.classList.add('center');
+                        const actualItemName = centerItem.querySelector('span').textContent;
+                        console.log('Actual center item:', actualItemName);
+                        console.log('Distance from center:', minDistance);
                         
-                        if (distanceFromCenter > 50) {
-                            console.warn('Item is not properly centered! Distance:', distanceFromCenter);
+                        // Check if the center item matches the selected item
+                        const selectedItemElement = document.getElementById('selected-item');
+                        if (selectedItemElement && centerItem === selectedItemElement) {
+                            console.log('✅ Perfect match! Selected item is in center');
+                        } else {
+                            console.warn('⚠️ Center item does not match selected item');
+                            console.log('Selected item:', selectedItem.name);
+                            console.log('Center item:', actualItemName);
                         }
                         
-                        // Verify the item name matches
-                        const itemName = selectedItemElement.querySelector('span').textContent;
-                        const expectedName = selectedItem.name;
-                        if (itemName !== expectedName) {
-                            console.error('Item name mismatch! Expected:', expectedName, 'Got:', itemName);
+                        // Use the actual center item for the result
+                        const actualItem = caseItemsList.find(item => item.name === actualItemName);
+                        if (actualItem) {
+                            console.log('🎯 Showing result for actual center item:', actualItemName);
+                            showCaseResult(actualItem);
                         } else {
-                            console.log('Item name verification passed:', itemName);
+                            console.warn('⚠️ Actual item not found in caseItemsList, using selected item as fallback');
+                            showCaseResult(selectedItem); // Fallback
                         }
                     } else {
-                        console.error('Selected item not found!');
+                        console.error('No items found in viewport!');
+                        showCaseResult(selectedItem); // Fallback
                     }
                     
-                    // Show result
-                    showCaseResult(selectedItem);
                     isOpening = false;
                     openCaseButton.disabled = false;
                     openCaseButton.textContent = '📦 Открыть кейс';
