@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOTA 2 Helper - Telegram Mini App</title>
+    <title>DOTA 2 Helper - Telegram Mini App (Beta 0.2)</title>
 
     <style>
         :root {
@@ -1882,7 +1882,7 @@
                         <div class="level-header">
                             <div class="level-info">
                                 <div class="level-number" id="user-level">25</div>
-                                <div class="level-title">Dota Master</div>
+                                <div class="level-title">Dota Master <span style="font-size: 0.6em; opacity: 0.7;">Beta 0.2</span></div>
                             </div>
                         </div>
                         
@@ -2265,16 +2265,24 @@
             const duration = 4000; // 4 seconds total
             const startTime = performance.now();
             let currentDistance = 0;
+            let lastFrameTime = startTime;
             
             function animate(currentTime) {
+                const deltaTime = currentTime - lastFrameTime;
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
+                
+                // Time-based movement calculation
+                const pixelsPerSecond = targetDistance / (duration / 1000);
+                const frameDistance = pixelsPerSecond * (deltaTime / 1000);
                 
                 // Smooth easing function: fast start, slow end
                 const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
                 
                 currentDistance = targetDistance * easeProgress;
                 caseItems.style.transform = `translateX(-${currentDistance}px)`;
+                
+                lastFrameTime = currentTime;
                 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
@@ -2473,12 +2481,28 @@
                 document.body.removeChild(modal);
             });
 
-            // Auto close after 5 seconds
-            setTimeout(() => {
-                if (document.body.contains(modal)) {
-                    document.body.removeChild(modal);
+            // Auto close after 5 seconds with time-based fade out
+            const modalStartTime = performance.now();
+            const modalDuration = 5000; // 5 seconds
+            
+            function autoCloseModal(currentTime) {
+                const elapsed = currentTime - modalStartTime;
+                const progress = Math.min(elapsed / modalDuration, 1);
+                
+                // Time-based fade out effect
+                const opacity = 1 - progress;
+                modal.style.opacity = opacity;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(autoCloseModal);
+                } else {
+                    if (document.body.contains(modal)) {
+                        document.body.removeChild(modal);
+                    }
                 }
-            }, 5000);
+            }
+            
+            requestAnimationFrame(autoCloseModal);
         }
 
         // Add event listener to open case button
@@ -2987,18 +3011,35 @@
                 }
                 
                 // Hide overlay after 2 seconds and switch to Meta tab
-                setTimeout(() => {
-                    subscriptionOverlay.style.display = 'none';
+                const hideStartTime = performance.now();
+                const hideDuration = 2000; // 2 seconds
+                
+                function hideOverlay(currentTime) {
+                    const elapsed = currentTime - hideStartTime;
+                    const progress = Math.min(elapsed / hideDuration, 1);
                     
-                    // Switch to Meta tab
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.style.display = 'none';
-                    });
-                    document.getElementById('builds').style.display = 'block';
+                    // Time-based fade out effect
+                    const opacity = 1 - progress;
+                    subscriptionOverlay.style.opacity = opacity;
                     
-                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                    document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
-                }, 2000);
+                    if (progress < 1) {
+                        requestAnimationFrame(hideOverlay);
+                    } else {
+                        subscriptionOverlay.style.display = 'none';
+                        subscriptionOverlay.style.opacity = '1';
+                        
+                        // Switch to Meta tab
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.style.display = 'none';
+                        });
+                        document.getElementById('builds').style.display = 'block';
+                        
+                        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                        document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
+                    }
+                }
+                
+                requestAnimationFrame(hideOverlay);
             } else {
                 alert('Неверный промо-код. Попробуйте снова.');
             }
@@ -3020,18 +3061,35 @@
             }
             
             // Hide overlay after 2 seconds and switch to Meta tab
-            setTimeout(() => {
-                subscriptionOverlay.style.display = 'none';
+            const hideStartTime2 = performance.now();
+            const hideDuration2 = 2000; // 2 seconds
+            
+            function hideOverlay2(currentTime) {
+                const elapsed = currentTime - hideStartTime2;
+                const progress = Math.min(elapsed / hideDuration2, 1);
                 
-                // Switch to Meta tab
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                document.getElementById('builds').style.display = 'block';
+                // Time-based fade out effect
+                const opacity = 1 - progress;
+                subscriptionOverlay.style.opacity = opacity;
                 
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
-            }, 2000);
+                if (progress < 1) {
+                    requestAnimationFrame(hideOverlay2);
+                } else {
+                    subscriptionOverlay.style.display = 'none';
+                    subscriptionOverlay.style.opacity = '1';
+                    
+                    // Switch to Meta tab
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById('builds').style.display = 'block';
+                    
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.tab-button[data-tab="builds"]').classList.add('active');
+                }
+            }
+            
+            requestAnimationFrame(hideOverlay2);
         });
 
         // Level System Functionality
@@ -3217,10 +3275,27 @@
                 
                 document.body.appendChild(xpGainElement);
                 
-                setTimeout(() => {
-                    document.body.removeChild(xpGainElement);
-                    document.head.removeChild(style);
-                }, 2000);
+                // Time-based removal of XP gain element
+                const xpStartTime = performance.now();
+                const xpDuration = 2000; // 2 seconds
+                
+                function removeXPGain(currentTime) {
+                    const elapsed = currentTime - xpStartTime;
+                    const progress = Math.min(elapsed / xpDuration, 1);
+                    
+                    // Time-based fade out
+                    const opacity = 1 - progress;
+                    xpGainElement.style.opacity = opacity;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(removeXPGain);
+                    } else {
+                        document.body.removeChild(xpGainElement);
+                        document.head.removeChild(style);
+                    }
+                }
+                
+                requestAnimationFrame(removeXPGain);
             }
 
             levelUp() {
@@ -3278,20 +3353,59 @@
                 
                 document.body.appendChild(levelUpElement);
                 
-                setTimeout(() => {
-                    document.body.removeChild(levelUpElement);
-                    document.head.removeChild(style);
-                }, 3000);
+                // Time-based removal of level up element
+                const levelUpStartTime = performance.now();
+                const levelUpDuration = 3000; // 3 seconds
+                
+                function removeLevelUp(currentTime) {
+                    const elapsed = currentTime - levelUpStartTime;
+                    const progress = Math.min(elapsed / levelUpDuration, 1);
+                    
+                    // Time-based fade out
+                    const opacity = 1 - progress;
+                    levelUpElement.style.opacity = opacity;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(removeLevelUp);
+                    } else {
+                        document.body.removeChild(levelUpElement);
+                        document.head.removeChild(style);
+                    }
+                }
+                
+                requestAnimationFrame(removeLevelUp);
             }
 
             animateXPBar() {
                 const xpBar = document.getElementById('xp-progress');
                 const currentWidth = xpBar.style.width;
+                const targetWidth = currentWidth;
+                
+                // Time-based animation
+                const animationDuration = 1000; // 1 second
+                const startTime = performance.now();
+                let lastFrameTime = startTime;
                 
                 xpBar.style.width = '0%';
-                setTimeout(() => {
-                    xpBar.style.width = currentWidth;
-                }, 100);
+                
+                function animateXP(currentTime) {
+                    const deltaTime = currentTime - lastFrameTime;
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / animationDuration, 1);
+                    
+                    // Time-based progress calculation
+                    const easeProgress = 1 - Math.pow(1 - progress, 2); // Quadratic ease-out
+                    const currentWidth = parseFloat(targetWidth) * easeProgress;
+                    
+                    xpBar.style.width = currentWidth + '%';
+                    lastFrameTime = currentTime;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateXP);
+                    }
+                }
+                
+                requestAnimationFrame(animateXP);
             }
 
             // Nickname Management Methods
@@ -3374,13 +3488,24 @@
                 
                 document.body.appendChild(modal);
                 
-                // Фокус на поле ввода
+                // Фокус на поле ввода с time-based delay
                 const input = modal.querySelector('#modal-nickname-input');
                 if (input) {
-                    setTimeout(() => {
-                        input.focus();
-                        input.select();
-                    }, 100);
+                    const focusStartTime = performance.now();
+                    const focusDelay = 100; // 100ms
+                    
+                    function focusInput(currentTime) {
+                        const elapsed = currentTime - focusStartTime;
+                        
+                        if (elapsed >= focusDelay) {
+                            input.focus();
+                            input.select();
+                        } else {
+                            requestAnimationFrame(focusInput);
+                        }
+                    }
+                    
+                    requestAnimationFrame(focusInput);
                 }
                 
                 // Обработчики событий
@@ -3411,11 +3536,22 @@
                         nicknameText.textContent = newNickname;
                         localStorage.setItem('userNickname', newNickname);
                         
-                        // Показываем анимацию сохранения
+                        // Показываем анимацию сохранения с time-based removal
                         nicknameText.classList.add('nickname-saved-animation');
-                        setTimeout(() => {
-                            nicknameText.classList.remove('nickname-saved-animation');
-                        }, 1000);
+                        const animationStartTime = performance.now();
+                        const animationDuration = 1000; // 1 second
+                        
+                        function removeAnimation(currentTime) {
+                            const elapsed = currentTime - animationStartTime;
+                            
+                            if (elapsed >= animationDuration) {
+                                nicknameText.classList.remove('nickname-saved-animation');
+                            } else {
+                                requestAnimationFrame(removeAnimation);
+                            }
+                        }
+                        
+                        requestAnimationFrame(removeAnimation);
                         
                         // Показываем уведомление об успешном сохранении
                         this.showNicknameSaved();
@@ -3477,10 +3613,27 @@
                 document.head.appendChild(style);
                 document.body.appendChild(errorElement);
 
-                setTimeout(() => {
-                    document.body.removeChild(errorElement);
-                    document.head.removeChild(style);
-                }, 2000);
+                // Time-based removal of error element
+                const errorStartTime = performance.now();
+                const errorDuration = 2000; // 2 seconds
+                
+                function removeError(currentTime) {
+                    const elapsed = currentTime - errorStartTime;
+                    const progress = Math.min(elapsed / errorDuration, 1);
+                    
+                    // Time-based fade out
+                    const opacity = 1 - progress;
+                    errorElement.style.opacity = opacity;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(removeError);
+                    } else {
+                        document.body.removeChild(errorElement);
+                        document.head.removeChild(style);
+                    }
+                }
+                
+                requestAnimationFrame(removeError);
             }
 
             showNicknameSaved() {
@@ -3522,10 +3675,27 @@
                 document.head.appendChild(style);
                 document.body.appendChild(savedElement);
 
-                setTimeout(() => {
-                    document.body.removeChild(savedElement);
-                    document.head.removeChild(style);
-                }, 1500);
+                // Time-based removal of saved element
+                const savedStartTime = performance.now();
+                const savedDuration = 1500; // 1.5 seconds
+                
+                function removeSaved(currentTime) {
+                    const elapsed = currentTime - savedStartTime;
+                    const progress = Math.min(elapsed / savedDuration, 1);
+                    
+                    // Time-based fade out
+                    const opacity = 1 - progress;
+                    savedElement.style.opacity = opacity;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(removeSaved);
+                    } else {
+                        document.body.removeChild(savedElement);
+                        document.head.removeChild(style);
+                    }
+                }
+                
+                requestAnimationFrame(removeSaved);
             }
         }
 
@@ -3564,23 +3734,34 @@
             }
         });
 
-        // Резервная инициализация через небольшую задержку
-        setTimeout(() => {
-            const changeNicknameBtn = document.getElementById('change-nickname-btn');
-            if (changeNicknameBtn && !changeNicknameBtn.hasAttribute('data-initialized')) {
-                changeNicknameBtn.setAttribute('data-initialized', 'true');
-                changeNicknameBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (levelSystem) {
-                        levelSystem.openNicknameModal();
-                    } else {
-                        console.error('Система уровней не инициализирована');
-                    }
-                });
-                console.log('Резервный обработчик для кнопки изменения никнейма установлен');
+        // Резервная инициализация через time-based delay
+        const backupStartTime = performance.now();
+        const backupDelay = 1000; // 1 second
+        
+        function backupInitialization(currentTime) {
+            const elapsed = currentTime - backupStartTime;
+            
+            if (elapsed >= backupDelay) {
+                const changeNicknameBtn = document.getElementById('change-nickname-btn');
+                if (changeNicknameBtn && !changeNicknameBtn.hasAttribute('data-initialized')) {
+                    changeNicknameBtn.setAttribute('data-initialized', 'true');
+                    changeNicknameBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (levelSystem) {
+                            levelSystem.openNicknameModal();
+                        } else {
+                            console.error('Система уровней не инициализирована');
+                        }
+                    });
+                    console.log('Резервный обработчик для кнопки изменения никнейма установлен');
+                }
+            } else {
+                requestAnimationFrame(backupInitialization);
             }
-        }, 1000);
+        }
+        
+        requestAnimationFrame(backupInitialization);
     </script>
 </body>
 </html>
